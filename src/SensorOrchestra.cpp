@@ -17,11 +17,32 @@
 */
 
 #include "SensorOrchestra.h"
+#include "Arrangement.h"
 #include "MacAddress.h"
+
+#define SO_DEBUG true
+#define MAC_ADDRESS_COUNT 7
 
 
 SensorOrchestra::SensorOrchestra() {
+    // create array of mac addresses
+    String macAddresses[] = {
+        #include "inc/MacAddresses.inc"
+    };
+    // initialize arrangement with mac addresses
+    Arrangement::getInstance().init(macAddresses, MAC_ADDRESS_COUNT);
+    // set midi channel and klock meister based on mac address
     setupDeviceParameters(MacAddress::get());
+    // print device parameters
+#if SO_DEBUG
+    Serial.println("Sensor Orchestra (SO)");
+    Serial.println("-------------------------------------------");
+    Serial.print("(SO) Mac Address: ");
+    Serial.println(mMacAddress);
+    Serial.printf("(SO) MIDI Channel: %i\n", mMidiChannel);
+    Serial.printf("(SO) Klock Meister: %i\n", mKlockMeister);
+    Serial.println("-------------------------------------------");
+#endif
 }
 
 

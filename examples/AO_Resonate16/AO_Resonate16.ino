@@ -18,6 +18,7 @@
 
 #include "SensorProxy.h"
 #include "MotorProxy.h"
+#include "SensorOrchestra.h"
 
 #define SENSOR_PIN A0
 #define MOTOR_DIR_PIN 3
@@ -26,9 +27,12 @@
 
 SensorProxy* mSensor;
 MotorProxy* mMotor;
+SensorOrchestra* mOrchestra;
 
 
 void setup() {
+  Serial.begin(9600);
+  delay(500);
   // setup pins
   pinMode(SENSOR_PIN, INPUT_PULLDOWN);
   pinMode(MOTOR_DIR_PIN, OUTPUT);
@@ -39,6 +43,8 @@ void setup() {
   mSensor->setValueCallback(&onSensorValue);
   // setup motor
   mMotor = new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN);
+  // setup orchestra
+  mOrchestra = new SensorOrchestra();
 }
 
 
@@ -48,5 +54,5 @@ void loop() {
 
 
 void onSensorValue(uint16_t pValue) {
-  Serial.printf("sensor value: %i", pValue);
+  //Serial.printf("sensor value: %i\n", pValue);
 }
