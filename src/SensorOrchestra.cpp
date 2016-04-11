@@ -25,7 +25,7 @@
 #define MAC_ADDRESS_COUNT 7
 
 
-SensorOrchestra::SensorOrchestra(MotorProxy* pMotor, SensorProxy* pSensor) : mMotor(pMotor), mSensor(pSensor) {
+SensorOrchestra::SensorOrchestra() : Orchestra() {
     // create array of mac addresses
     String macAddresses[] = {
         #include "inc/MacAddresses.inc"
@@ -37,21 +37,63 @@ SensorOrchestra::SensorOrchestra(MotorProxy* pMotor, SensorProxy* pSensor) : mMo
 }
 
 
-SensorOrchestra::~SensorOrchestra(){
+SensorOrchestra::~SensorOrchestra() {
+    delete mMotor;
+    mMotor = nullptr;
+    delete mSensor;
+    mSensor = nullptr;
+}
+
+
+void SensorOrchestra::setupMotor(MotorProxy* pMotor) {
+    mMotor = pMotor;
+}
+
+
+void SensorOrchestra::setupSensor(SensorProxy* pSensor) {
+    mSensor = pSensor;
+}
+
+
+MotorProxy* SensorOrchestra::getMotor() {
+    return mMotor;
+}
+
+
+SensorProxy* SensorOrchestra::getSensor() {
+    return mSensor;
 }
 
 
 void SensorOrchestra::start() {
+    Orchestra::start();
+
+    if(mMotor == nullptr){
+        Serial.println("(SO) -> start() - ERROR: call setupMotor() before calling start()");
+        return;
+    }
+
+    if(mSensor == nullptr){
+        Serial.println("(SO) -> start() - ERROR: call setupSensor() before calling start()");
+        return;
+    }
+
     // send out MIDI clock start which synchronizes the motors
     if(isKlockMeister()) {
         Serial.println("(SO) -> start()");
         Midi.sendStart();
     }
+
+    // DO NOT CHANGE THE INITAL MOVEMENT HERE!!!
+    // Set it in the getMovement() method when passing in the secodn parameter to movement null.
+    sendChangeMovement(Movement::MOVEMENT_NULL);
 }
 
 
 void SensorOrchestra::update() {
-
+    Orchestra::update();
+    mMotor->update();
+    mSensor->update();
 }
 
 

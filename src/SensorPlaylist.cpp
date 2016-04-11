@@ -1,6 +1,6 @@
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- MovementSensor.cpp
+ SensorPlaylist.cpp
  Copyright (c) 2016 Automatic Orchestra
 
  See the COPYRIGHT file at the top-level directory of this distribution and at:
@@ -16,26 +16,45 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
+#include "SensorPlaylist.h"
+#include "Movement.h"
+#include "MovementNull.h"
 #include "MovementSensor.h"
-#include "PodSensor.h"
+
+#define MOVEMENT_COUNT 1
+// IDs for movement con not be 0!!!
+#define MOVEMENT_SENSOR 1
 
 
-MovementSensor::MovementSensor(Orchestra* pParent, int pNextMovement) : Movement(pParent, pNextMovement) {
-  mPod = new PodSensor(pParent);
+SensorPlaylist::SensorPlaylist() : Playlist() {
+    populateMovementIDs();
 }
 
 
-MovementSensor::~MovementSensor() {
-  delete mPod;
-  mPod = nullptr;
+SensorPlaylist::~SensorPlaylist() {
 }
 
 
-Pod* MovementSensor::getPod() {
-  return mPod;
+uint8_t SensorPlaylist::getNumberOfMovements() {
+    return MOVEMENT_COUNT;
 }
 
 
-String getName() {
-  return "MovementSensor (MS)";
+Movement* SensorPlaylist::createMovement(int pMovementID) {
+    Movement* mMovement = 0;
+    switch (pMovementID) {
+        case Movement::MOVEMENT_NULL:
+            mMovement = new MovementNull(parent(), mMovementIDs[0]);
+            break;
+        case MOVEMENT_SENSOR:
+            mMovement = new MovementSensor(parent(), nextMovementID(pMovementID));
+            break;
+    }
+    return mMovement;
+}
+
+
+void SensorPlaylist::populateMovementIDs() {
+    mMovementIDs = new int[MOVEMENT_COUNT];
+    mMovementIDs[0] = MOVEMENT_SENSOR;
 }

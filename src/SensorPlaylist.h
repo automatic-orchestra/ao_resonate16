@@ -1,6 +1,6 @@
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- MovementSensor.h
+ SensorPlaylist.h
  Copyright (c) 2016 Automatic Orchestra
 
  See the COPYRIGHT file at the top-level directory of this distribution and at:
@@ -16,25 +16,22 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-#ifndef MOVEMENTSENSOR_H
-#define MOVEMENTSENSOR_H
+#ifndef SENSORPLAYLIST_H
+#define SENSORPLAYLIST_H
 
 #include <Arduino.h>
-#include "Movement.h"
-#include "Orchestra.h"
-#include "Pod.h"
+#include "Playlist.h"
 
 
-class MovementSensor : public Movement
+class SensorPlaylist : public Playlist
 {
 public:
-  MovementSensor(Orchestra* pParent, int pNextMovement);
-  ~MovementSensor();
-  Pod* getPod();
-  String getName();
-private:
-  Pod* mPod;
+  SensorPlaylist();
+  ~SensorPlaylist();
+  uint8_t getNumberOfMovements();
+protected:
+  Movement* createMovement(int pMovementID);
+  void populateMovementIDs();
 };
 
-
-#endif //MOVEMENTSENSOR_H
+#endif //SENSORPLAYLIST_H

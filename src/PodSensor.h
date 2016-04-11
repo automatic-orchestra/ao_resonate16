@@ -21,14 +21,14 @@
 
 #include <Arduino.h>
 #include "Pod.h"
-#include "AutomaticOrchestra.h"
+#include "Orchestra.h"
 
 
 class PodSensor : public Pod
 {
 public:
-  PodSensor(AutomaticOrchestra* pParent);
-  virtual ~PodSensor();
+  PodSensor(Orchestra* pParent);
+  ~PodSensor();
 };
 
 

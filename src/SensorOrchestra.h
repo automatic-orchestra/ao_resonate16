@@ -23,19 +23,24 @@
 #include "Orchestra.h"
 #include "SensorProxy.h"
 #include "MotorProxy.h"
+#include "Playlist.h"
 
 
 class SensorOrchestra : public Orchestra
 {
 public:
-  SensorOrchestra(MotorProxy* pMotor, SensorProxy* pSensor);
+  SensorOrchestra();
   ~SensorOrchestra();
+  void setupMotor(MotorProxy* pMotor);
+  void setupSensor(SensorProxy* pSensor);
+  MotorProxy* getMotor();
+  SensorProxy* getSensor();
   void start();
   void update();
   void onClockStart();
 private:
-  MotorProxy* mMotor;
-  SensorProxy* mSensor;
+  MotorProxy* mMotor = nullptr;
+  SensorProxy* mSensor = nullptr;
 };
 
 

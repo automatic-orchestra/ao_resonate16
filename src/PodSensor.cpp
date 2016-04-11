@@ -19,6 +19,9 @@
 #include "PodSensor.h"
 
 
-PodSensor::PodSensor(AutomaticOrchestra* pParent) : Pod(pParent) {
-  
+PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
+}
+
+
+PodSensor::~PodSensor() {
 }

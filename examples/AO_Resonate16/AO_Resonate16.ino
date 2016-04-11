@@ -16,11 +16,12 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-#include "SensorProxy.h"
-#include "MotorProxy.h"
 #include "SensorOrchestra.h"
-#include "CFOMidi.h"
+#include "MotorProxy.h"
+#include "SensorProxy.h"
+#include "SensorPlaylist.h"
 #include "CFOSynthesizer.h"
+#include "CFOMidi.h"
 
 #define SENSOR_PIN A0
 #define MOTOR_DIR_PIN 3
@@ -29,8 +30,6 @@
 #define INIT_DELAY 1000
 
 SensorOrchestra* mOrchestra;
-SensorProxy* mSensor;
-MotorProxy* mMotor;
 
 // Forward declaration of callback functions
 void onMidiNoteOn(byte channel, byte note, byte velocity);
@@ -46,17 +45,16 @@ void setup() {
   pinMode(MOTOR_DIR_PIN, OUTPUT);
   pinMode(MOTOR_STEP_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
-  
-  // setup sensor
-  mSensor = new SensorProxy(SENSOR_PIN);
-  mSensor->setValueCallback(&onSensorValue);
 
+  // create orchestra
+  mOrchestra = new SensorOrchestra();
   // setup motor
-  mMotor = new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN);
-
-  // setup orchestra
-  mOrchestra = new SensorOrchestra(mMotor, mSensor);
-
+  mOrchestra->setupMotor(new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN));
+  // setup sensor
+  mOrchestra->setupSensor(new SensorProxy(SENSOR_PIN));
+  mOrchestra->getSensor()->setValueCallback(&onSensorValue);
+  // setup playlist
+  mOrchestra->setupPlaylist(new SensorPlaylist());
 
   // Initialize synth engine
   Music.init();
@@ -112,9 +110,6 @@ void loop() {
   usbMIDI.read();
   // process incoming MIDI interface data
   Midi.checkSerialMidi();
-
-  mSensor->update();
-  mMotor->update();
 }
 
 
@@ -170,7 +165,7 @@ void onMidiNoteOff(byte channel, byte note, byte velocity) {
 
 
 void onMidiControlChange(byte channel, byte control, byte value) {
-  Serial.printf("MIDI Control Change: %i = %i\n", control, value);
+  mOrchestra->onControlChange(channel, control, value);
 }
 
 
