@@ -25,7 +25,7 @@
 #define MAC_ADDRESS_COUNT 7
 
 
-SensorOrchestra::SensorOrchestra() {
+SensorOrchestra::SensorOrchestra(MotorProxy* pMotor, SensorProxy* pSensor) : mMotor(pMotor), mSensor(pSensor) {
     // create array of mac addresses
     String macAddresses[] = {
         #include "inc/MacAddresses.inc"
@@ -38,4 +38,27 @@ SensorOrchestra::SensorOrchestra() {
 
 
 SensorOrchestra::~SensorOrchestra(){
+}
+
+
+void SensorOrchestra::start() {
+    // send out MIDI clock start which synchronizes the motors
+    if(isKlockMeister()) {
+        Serial.println("(SO) -> start()");
+        Midi.sendStart();
+    }
+}
+
+
+void SensorOrchestra::update() {
+
+}
+
+
+void SensorOrchestra::onClockStart() {
+    Serial.println("(SO) -> onClockStart()");
+    // sync motors
+    mMotor->setZeroPosition();
+    // call super function for default behavior
+    Orchestra::onClockStart();
 }

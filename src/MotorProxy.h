@@ -28,6 +28,8 @@ class MotorProxy
 public:
   MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin);
   ~MotorProxy();
+  void setZeroPosition();
+  void update();
 private:
   AccelStepper mMotor;
 };

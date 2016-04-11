@@ -21,13 +21,21 @@
 
 #include <Arduino.h>
 #include "Orchestra.h"
+#include "SensorProxy.h"
+#include "MotorProxy.h"
 
 
 class SensorOrchestra : public Orchestra
 {
 public:
-  SensorOrchestra();
+  SensorOrchestra(MotorProxy* pMotor, SensorProxy* pSensor);
   ~SensorOrchestra();
+  void start();
+  void update();
+  void onClockStart();
+private:
+  MotorProxy* mMotor;
+  SensorProxy* mSensor;
 };
 
 

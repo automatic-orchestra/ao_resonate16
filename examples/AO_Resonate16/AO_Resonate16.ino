@@ -28,9 +28,9 @@
 #define LED_PIN 13 // original value: 5
 #define INIT_DELAY 1000
 
+SensorOrchestra* mOrchestra;
 SensorProxy* mSensor;
 MotorProxy* mMotor;
-SensorOrchestra* mOrchestra;
 
 // Forward declaration of callback functions
 void onMidiNoteOn(byte channel, byte note, byte velocity);
@@ -55,7 +55,8 @@ void setup() {
   mMotor = new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN);
 
   // setup orchestra
-  mOrchestra = new SensorOrchestra();
+  mOrchestra = new SensorOrchestra(mMotor, mSensor);
+
 
   // Initialize synth engine
   Music.init();
@@ -98,11 +99,22 @@ void setup() {
   Midi.setControllerCallback(&onMidiControlChange);
   Midi.setClockTickCallback(&onMidiClockTick);
   Midi.setClockStartCallback(&onMidiClockStart);
+
+  // start orchestra
+  mOrchestra->start();
 }
 
 
 void loop() {
+  // update orchestra
+  mOrchestra->update();
+  // process incoming USB MIDI interface data
+  usbMIDI.read();
+  // process incoming MIDI interface data
+  Midi.checkSerialMidi();
+
   mSensor->update();
+  mMotor->update();
 }
 
 
@@ -131,6 +143,9 @@ void onUsbNoteOff(byte channel, byte note, byte velocity) {
 void onUsbControlChange(byte channel, byte control, byte value) {
   // decrement channel by 1 due to non zero based counting in USB MIDI interface
   channel--;
+  // send out message
+  // Midi.controller(channel, control, value);
+  Serial.printf("USB MIDI Control Change: %i = %i\n", control, value);
 }
 
 
@@ -155,7 +170,7 @@ void onMidiNoteOff(byte channel, byte note, byte velocity) {
 
 
 void onMidiControlChange(byte channel, byte control, byte value) {
-  
+  Serial.printf("MIDI Control Change: %i = %i\n", control, value);
 }
 
 
@@ -165,7 +180,7 @@ void onMidiClockTick() {
 
 
 void onMidiClockStart() {
-
+  mOrchestra->onClockStart();
 }
 
 
