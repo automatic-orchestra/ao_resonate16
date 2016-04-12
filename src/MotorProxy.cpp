@@ -18,14 +18,17 @@
 
 #include "MotorProxy.h"
 
+#define MP_DEBUG false
+#define FULL_REVOLUTION 25600
+
 
 MotorProxy::MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin) {
   mMotor = AccelStepper(AccelStepper::FULL2WIRE, pStepPin, pDirectionPin);
   // The desired maximum speed in steps per second. Must be > 0.
-  mMotor.setMaxSpeed(1000);
+  mMotor.setMaxSpeed(FULL_REVOLUTION);
   // Constant speed in steps per second. Positive is clockwise.
   // Speeds of more than 1000 steps per second are unreliable.
-  mMotor.setSpeed(-500);
+  mMotor.setSpeed(FULL_REVOLUTION);
 }
 
 
@@ -46,7 +49,7 @@ void MotorProxy::setZeroPosition() {
 
 void MotorProxy::update() {
   if(mRunning) {
-    mMotor.run();  
+    mMotor.runSpeed();
   }
 }
 
