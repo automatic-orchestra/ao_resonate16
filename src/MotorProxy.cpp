@@ -39,11 +39,13 @@ MotorProxy::~MotorProxy() {
 
 void MotorProxy::setZeroPosition() {
   Serial.println("(MP) -> setZeroPosition()");
-  /// Resets the current position of the motor, so that wherever the motor
-  /// happens to be right now is considered to be the new 0 position. Useful
-  /// for setting a zero position on a stepper after an initial hardware
-  /// positioning move.
+  // Resets the current position of the motor, so that wherever the motor
+  // happens to be right now is considered to be the new 0 position. Useful
+  // for setting a zero position on a stepper after an initial hardware
+  // positioning move. Has the side effect of setting the current motor speed to 0.
   mMotor.setCurrentPosition(0);
+  // set speed to actual speed again
+  mMotor.setSpeed(FULL_REVOLUTION);
 }
 
 
