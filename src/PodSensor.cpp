@@ -40,6 +40,7 @@ PodSensor::~PodSensor() {
 SensorOrchestra* PodSensor::getConcreteParent() {
   // upcast from base class Orchestra to concrete class SensorOrchestra
   // to gain access to motor and sensor proxy instances.
+  // http://www.cplusplus.com/doc/tutorial/typecasting/
   return static_cast<SensorOrchestra*>(getParent());
 }
 

@@ -39,6 +39,7 @@ public:
   PulseClock* getClock();
   void start();
   void update();
+  // MIDI message methods
   void onClockStart();
   // movement handling
   void changeMovement(int pMovementID);
