@@ -27,7 +27,7 @@
 #define SENSOR_PIN A0
 #define MOTOR_DIR_PIN 3
 #define MOTOR_STEP_PIN 4
-#define LED_PIN 13 // original value: 5
+#define LED_PIN 5
 #define INIT_DELAY 1000
 
 SensorOrchestra* mOrchestra;
@@ -57,7 +57,7 @@ void setup() {
   // setup playlist
   mOrchestra->setPlaylist(new SensorPlaylist());
   // setup clock
-  mOrchestra->setClock(new PulseClock(1000));
+  mOrchestra->setClock(new PulseClock(100));
 
   // Initialize synth engine
   Music.init();
