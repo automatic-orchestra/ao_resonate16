@@ -31,6 +31,7 @@ public:
   void setZeroPosition();
   void update();
   void start();
+  bool isRunning();
 private:
   AccelStepper mMotor;
   bool mRunning = false;

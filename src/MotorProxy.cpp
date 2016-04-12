@@ -25,13 +25,7 @@ MotorProxy::MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin) {
   mMotor.setMaxSpeed(1000);
   // Constant speed in steps per second. Positive is clockwise.
   // Speeds of more than 1000 steps per second are unreliable.
-  mMotor.setSpeed(-500);  
-
-  /// Resets the current position of the motor, so that wherever the motor
-  /// happens to be right now is considered to be the new 0 position. Useful
-  /// for setting a zero position on a stepper after an initial hardware
-  /// positioning move.
-  // setCurrentPosition(long position); 
+  mMotor.setSpeed(-500);
 }
 
 
@@ -41,11 +35,12 @@ MotorProxy::~MotorProxy() {
 
 
 void MotorProxy::setZeroPosition() {
-    /// Resets the current position of the motor, so that wherever the motor
-    /// happens to be right now is considered to be the new 0 position. Useful
-    /// for setting a zero position on a stepper after an initial hardware
-    /// positioning move.
-    mMotor.setCurrentPosition(0);
+  Serial.println("(MP) -> setZeroPosition()");
+  /// Resets the current position of the motor, so that wherever the motor
+  /// happens to be right now is considered to be the new 0 position. Useful
+  /// for setting a zero position on a stepper after an initial hardware
+  /// positioning move.
+  mMotor.setCurrentPosition(0);
 }
 
 
@@ -61,4 +56,9 @@ void MotorProxy::start() {
     Serial.println("(MP) -> start()");
     mRunning = true;  
   }
+}
+
+
+bool MotorProxy::isRunning() {
+  return mRunning;
 }

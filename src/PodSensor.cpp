@@ -18,6 +18,7 @@
 
 #include "PodSensor.h"
 
+#define PS_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
 
 
@@ -26,6 +27,9 @@ PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   int midiChannel = getParent()->getChannel();
   // calculate delay in pulses
   mPulseDelay = midiChannel * CHANNEL_DELAY_INCREMENT;
+#if PS_DEBUG
+  Serial.printf("(PS) -> constructor(): pulse delay is: %i\n", mPulseDelay);  
+#endif
 }
 
 
@@ -41,10 +45,16 @@ SensorOrchestra* PodSensor::getConcreteParent() {
 
 
 void PodSensor::onClockBeatChange(unsigned long beat) {
-  mPulseCount++;
-  Serial.printf("(PS) pulse count is: %i\n", mPulseCount);
+  // check initial pulse at zero...
+#if PS_DEBUG
+  if(!getConcreteParent()->getMotor()->isRunning()) {
+    Serial.printf("(PS) -> onClockBeatChange(): pulse count is: %i\n", mPulseCount);  
+  }
+#endif
+  // start motor movement after delay has elapsed
   if(mPulseCount >= mPulseDelay) {
-    // start motor movement after delay has elapsed
     getConcreteParent()->getMotor()->start();
   }
+  // therefore increment afterwards
+  mPulseCount++;
 }
