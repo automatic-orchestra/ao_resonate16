@@ -1,6 +1,6 @@
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- MovementSensor.cpp
+ PulseClock.cpp
  Copyright (c) 2016 Automatic Orchestra
 
  See the COPYRIGHT file at the top-level directory of this distribution and at:
@@ -16,35 +16,48 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-#include "MovementSensor.h"
-#include "PodSensor.h"
+#include "PulseClock.h"
+
+#define MAX_PULSES 200
 
 
-MovementSensor::MovementSensor(Orchestra* pParent, int pNextMovement) : Movement(pParent, pNextMovement) {
-  mPod = new PodSensor(pParent);
+PulseClock::PulseClock(unsigned long pPulseInMs) : mTimeDiff(pPulseInMs * 1000) {
 }
 
 
-MovementSensor::~MovementSensor() {
-  delete mPod;
-  mPod = nullptr;
+PulseClock::~PulseClock() {
 }
 
 
-Pod* MovementSensor::getPod() {
-  return mPod;
+void PulseClock::start() {
+  reset();
 }
 
 
-String MovementSensor::getName() {
-  return "MovementSensor (MS)";
+void PulseClock::reset() {
+  // Serial.println("(PC) -> reset()");
+  mTimeNow = 0;
+  mTimeLast = 0;
+  // set to max pulses so first pulse is zero.
+  mPulseCount = MAX_PULSES;
 }
 
 
-int MovementSensor::isFinished() {
-    if(parent()->isKlockMeister()) {
-        return false ? getNextMovement() : MOVEMENT_DO_NOT_CHANGE;
-    } else {
-        return MOVEMENT_DO_NOT_CHANGE;
+bool PulseClock::update() {
+  bool res = false;
+  // time in mircoseconds: 1000 milliseconds
+  mTimeNow = micros();
+  if (mTimeNow - mTimeLast >= mTimeDiff) {
+    if (++mPulseCount >= MAX_PULSES) {
+      mPulseCount = 0;
     }
+    mTimeLast = mTimeNow;
+    res = true;
+  }
+  return res;
+}
+
+
+uint8_t PulseClock::getCount() {
+  return mPulseCount;
 }

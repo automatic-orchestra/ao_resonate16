@@ -21,9 +21,9 @@
 
 #include <Arduino.h>
 #include "Orchestra.h"
-#include "SensorProxy.h"
 #include "MotorProxy.h"
-#include "Playlist.h"
+#include "SensorProxy.h"
+#include "PulseClock.h"
 
 
 class SensorOrchestra : public Orchestra
@@ -31,16 +31,21 @@ class SensorOrchestra : public Orchestra
 public:
   SensorOrchestra();
   ~SensorOrchestra();
-  void setupMotor(MotorProxy* pMotor);
-  void setupSensor(SensorProxy* pSensor);
+  void setMotor(MotorProxy* pMotor);
+  void setSensor(SensorProxy* pSensor);
+  void setClock(PulseClock* pClock);
   MotorProxy* getMotor();
   SensorProxy* getSensor();
+  PulseClock* getClock();
   void start();
   void update();
   void onClockStart();
+  // movement handling
+  void changeMovement(int pMovementID);
 private:
   MotorProxy* mMotor = nullptr;
   SensorProxy* mSensor = nullptr;
+  PulseClock* mClock = nullptr;
 };
 
 

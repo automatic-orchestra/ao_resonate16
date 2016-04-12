@@ -41,6 +41,7 @@ uint8_t SensorPlaylist::getNumberOfMovements() {
 
 
 Movement* SensorPlaylist::createMovement(int pMovementID) {
+    Serial.printf("(SP) -> createMovement(): with id %i\n", pMovementID);
     Movement* mMovement = 0;
     switch (pMovementID) {
         case Movement::MOVEMENT_NULL:

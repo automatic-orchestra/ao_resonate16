@@ -19,8 +19,8 @@
 #include "SensorOrchestra.h"
 #include "Arrangement.h"
 #include "MacAddress.h"
-#include "CFOSynthesizer.h"
 #include "CFOMidi.h"
+#include "Movement.h"
 
 #define MAC_ADDRESS_COUNT 7
 
@@ -42,16 +42,22 @@ SensorOrchestra::~SensorOrchestra() {
     mMotor = nullptr;
     delete mSensor;
     mSensor = nullptr;
+    delete mClock;
+    mClock = nullptr;
 }
 
 
-void SensorOrchestra::setupMotor(MotorProxy* pMotor) {
+void SensorOrchestra::setMotor(MotorProxy* pMotor) {
     mMotor = pMotor;
 }
 
 
-void SensorOrchestra::setupSensor(SensorProxy* pSensor) {
+void SensorOrchestra::setSensor(SensorProxy* pSensor) {
     mSensor = pSensor;
+}
+
+void SensorOrchestra::setClock(PulseClock* pClock) {
+    mClock = pClock;
 }
 
 
@@ -65,16 +71,26 @@ SensorProxy* SensorOrchestra::getSensor() {
 }
 
 
+PulseClock* SensorOrchestra::getClock() {
+    return mClock;
+}
+
+
 void SensorOrchestra::start() {
     Orchestra::start();
 
     if(mMotor == nullptr){
-        Serial.println("(SO) -> start() - ERROR: call setupMotor() before calling start()");
+        Serial.println("(SO) -> start() - ERROR: call setMotor() before calling start()");
         return;
     }
 
     if(mSensor == nullptr){
-        Serial.println("(SO) -> start() - ERROR: call setupSensor() before calling start()");
+        Serial.println("(SO) -> start() - ERROR: call setSensor() before calling start()");
+        return;
+    }
+
+    if(mClock == nullptr){
+        Serial.println("(SO) -> start() - ERROR: call setClock() before calling start()");
         return;
     }
 
@@ -94,6 +110,12 @@ void SensorOrchestra::update() {
     Orchestra::update();
     mMotor->update();
     mSensor->update();
+    if(mClock->update()){
+        // Serial.printf("(SO) -> update(): clock tick: %i\n", mClock->getCount());
+        if(mCurrentMovement){
+            mCurrentMovement->onClockBeatChange(mClock->getCount());
+        }
+    }
 }
 
 
@@ -103,4 +125,11 @@ void SensorOrchestra::onClockStart() {
     mMotor->setZeroPosition();
     // call super function for default behavior
     Orchestra::onClockStart();
+}
+
+
+
+void SensorOrchestra::changeMovement(int pMovementID) {
+    mClock->reset();
+    Orchestra::changeMovement(pMovementID);
 }

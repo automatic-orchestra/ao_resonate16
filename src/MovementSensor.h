@@ -32,6 +32,7 @@ public:
   ~MovementSensor();
   Pod* getPod();
   String getName();
+  int isFinished();
 private:
   Pod* mPod;
 };

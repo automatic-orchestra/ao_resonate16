@@ -1,6 +1,6 @@
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- MovementSensor.cpp
+ PulseClock.h
  Copyright (c) 2016 Automatic Orchestra
 
  See the COPYRIGHT file at the top-level directory of this distribution and at:
@@ -16,35 +16,26 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-#include "MovementSensor.h"
-#include "PodSensor.h"
+#ifndef PULSECLOCK_H
+#define PULSECLOCK_H
+
+#include <Arduino.h>
 
 
-MovementSensor::MovementSensor(Orchestra* pParent, int pNextMovement) : Movement(pParent, pNextMovement) {
-  mPod = new PodSensor(pParent);
-}
+class PulseClock
+{
+public:
+  PulseClock(unsigned long pPulseInMs);
+  ~PulseClock();
+  void start();
+  void reset();
+  bool update();
+  uint8_t getCount();
+private:
+  uint8_t mPulseCount = 0;
+  unsigned long mTimeDiff;
+  unsigned long mTimeNow = 0;
+  unsigned long mTimeLast = 0;
+};
 
-
-MovementSensor::~MovementSensor() {
-  delete mPod;
-  mPod = nullptr;
-}
-
-
-Pod* MovementSensor::getPod() {
-  return mPod;
-}
-
-
-String MovementSensor::getName() {
-  return "MovementSensor (MS)";
-}
-
-
-int MovementSensor::isFinished() {
-    if(parent()->isKlockMeister()) {
-        return false ? getNextMovement() : MOVEMENT_DO_NOT_CHANGE;
-    } else {
-        return MOVEMENT_DO_NOT_CHANGE;
-    }
-}
+#endif //PULSECLOCK_H

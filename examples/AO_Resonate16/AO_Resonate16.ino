@@ -17,11 +17,12 @@
 */
 
 #include "SensorOrchestra.h"
-#include "MotorProxy.h"
-#include "SensorProxy.h"
-#include "SensorPlaylist.h"
 #include "CFOSynthesizer.h"
 #include "CFOMidi.h"
+#include "MotorProxy.h"
+#include "SensorProxy.h"
+#include "PulseClock.h"
+#include "SensorPlaylist.h"
 
 #define SENSOR_PIN A0
 #define MOTOR_DIR_PIN 3
@@ -49,12 +50,14 @@ void setup() {
   // create orchestra
   mOrchestra = new SensorOrchestra();
   // setup motor
-  mOrchestra->setupMotor(new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN));
+  mOrchestra->setMotor(new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN));
   // setup sensor
-  mOrchestra->setupSensor(new SensorProxy(SENSOR_PIN));
+  mOrchestra->setSensor(new SensorProxy(SENSOR_PIN));
   mOrchestra->getSensor()->setValueCallback(&onSensorValue);
   // setup playlist
-  mOrchestra->setupPlaylist(new SensorPlaylist());
+  mOrchestra->setPlaylist(new SensorPlaylist());
+  // setup clock
+  mOrchestra->setClock(new PulseClock(1000));
 
   // Initialize synth engine
   Music.init();
