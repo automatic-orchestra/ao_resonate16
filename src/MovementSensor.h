@@ -21,7 +21,7 @@
 
 #include <Arduino.h>
 #include "Movement.h"
-#include "Orchestra.h"
+#include "SensorOrchestra.h"
 #include "Pod.h"
 
 
@@ -33,6 +33,7 @@ public:
   Pod* getPod();
   String getName();
   int isFinished();
+  void onClockBeatChange(unsigned long beat);
 private:
   Pod* mPod;
 };

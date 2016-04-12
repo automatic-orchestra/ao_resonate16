@@ -21,7 +21,7 @@
 
 #include <Arduino.h>
 #include "Pod.h"
-#include "Orchestra.h"
+#include "SensorOrchestra.h"
 
 
 class PodSensor : public Pod
@@ -29,6 +29,11 @@ class PodSensor : public Pod
 public:
   PodSensor(Orchestra* pParent);
   ~PodSensor();
+  SensorOrchestra* getConcreteParent();
+  void onClockBeatChange(unsigned long beat);
+private:
+  uint8_t mPulseDelay = 0;
+  uint64_t mPulseCount = 0;
 };
 
 

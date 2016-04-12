@@ -50,5 +50,15 @@ void MotorProxy::setZeroPosition() {
 
 
 void MotorProxy::update() {
-  mMotor.run();
+  if(mRunning) {
+    mMotor.run();  
+  }
+}
+
+
+void MotorProxy::start() {
+  if(!mRunning) {
+    Serial.println("(MP) -> start()");
+    mRunning = true;  
+  }
 }

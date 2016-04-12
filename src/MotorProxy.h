@@ -30,8 +30,10 @@ public:
   ~MotorProxy();
   void setZeroPosition();
   void update();
+  void start();
 private:
   AccelStepper mMotor;
+  bool mRunning = false;
 };
 
 

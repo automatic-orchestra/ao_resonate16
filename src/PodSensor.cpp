@@ -18,10 +18,33 @@
 
 #include "PodSensor.h"
 
+#define CHANNEL_DELAY_INCREMENT 15
+
 
 PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
+  // retrieve MIDI channel
+  int midiChannel = getParent()->getChannel();
+  // calculate delay in pulses
+  mPulseDelay = midiChannel * CHANNEL_DELAY_INCREMENT;
 }
 
 
 PodSensor::~PodSensor() {
+}
+
+
+SensorOrchestra* PodSensor::getConcreteParent() {
+  // upcast from base class Orchestra to concrete class SensorOrchestra
+  // to gain access to motor and sensor proxy instances.
+  return static_cast<SensorOrchestra*>(getParent());
+}
+
+
+void PodSensor::onClockBeatChange(unsigned long beat) {
+  mPulseCount++;
+  Serial.printf("(PS) pulse count is: %i\n", mPulseCount);
+  if(mPulseCount >= mPulseDelay) {
+    // start motor movement after delay has elapsed
+    getConcreteParent()->getMotor()->start();
+  }
 }

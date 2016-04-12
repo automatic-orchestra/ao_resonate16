@@ -48,3 +48,8 @@ int MovementSensor::isFinished() {
         return MOVEMENT_DO_NOT_CHANGE;
     }
 }
+
+
+void MovementSensor::onClockBeatChange(unsigned long beat) {
+  Movement::onClockBeatChange(beat);
+}
