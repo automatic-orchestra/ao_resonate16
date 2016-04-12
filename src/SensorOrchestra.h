@@ -46,6 +46,7 @@ private:
   MotorProxy* mMotor = nullptr;
   SensorProxy* mSensor = nullptr;
   PulseClock* mClock = nullptr;
+  void startFirstMovement();
 };
 
 

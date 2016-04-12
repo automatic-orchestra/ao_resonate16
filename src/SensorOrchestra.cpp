@@ -99,10 +99,6 @@ void SensorOrchestra::start() {
         Serial.println("(SO) -> start()");
         Midi.sendStart();
     }
-
-    // DO NOT CHANGE THE INITAL MOVEMENT HERE!!!
-    // Set it in the getMovement() method when passing in the secodn parameter to movement null.
-    sendChangeMovement(Movement::MOVEMENT_NULL);
 }
 
 
@@ -125,6 +121,12 @@ void SensorOrchestra::onClockStart() {
     mMotor->setZeroPosition();
     // call super function for default behavior
     Orchestra::onClockStart();
+    // pass on MIDI start message
+    if(!isKlockMeister()){
+        Midi.sendStart();
+    } else {
+        startFirstMovement();
+    }
 }
 
 
@@ -132,4 +134,11 @@ void SensorOrchestra::onClockStart() {
 void SensorOrchestra::changeMovement(int pMovementID) {
     mClock->reset();
     Orchestra::changeMovement(pMovementID);
+}
+
+
+void SensorOrchestra::startFirstMovement() {
+    // DO NOT CHANGE THE INITAL MOVEMENT HERE!!!
+    // Set it in the getMovement() method when passing in the secodn parameter to movement null.
+    sendChangeMovement(Movement::MOVEMENT_NULL);
 }
