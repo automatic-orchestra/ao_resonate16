@@ -19,16 +19,11 @@
 #include "MotorProxy.h"
 
 #define MP_DEBUG false
-#define FULL_REVOLUTION 25600
 
 
 MotorProxy::MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin) {
   mMotor = AccelStepper(AccelStepper::FULL2WIRE, pStepPin, pDirectionPin);
-  // The desired maximum speed in steps per second. Must be > 0.
-  mMotor.setMaxSpeed(FULL_REVOLUTION);
-  // Constant speed in steps per second. Positive is clockwise.
-  // Speeds of more than 1000 steps per second are unreliable.
-  mMotor.setSpeed(FULL_REVOLUTION);
+  setDefaultSpeed(FULL_REVOLUTION);
 }
 
 
@@ -45,25 +40,89 @@ void MotorProxy::setZeroPosition() {
   // positioning move. Has the side effect of setting the current motor speed to 0.
   mMotor.setCurrentPosition(0);
   // set speed to actual speed again
-  mMotor.setSpeed(FULL_REVOLUTION);
+  mMotor.setSpeed(mDefaultSpeed);
 }
 
 
 void MotorProxy::update() {
-  if(mRunning) {
-    mMotor.runSpeed();
+  if(mActive) {
+    if(mTargetMode) {
+      mMotor.run();
+      if(!mMotor.isRunning()) {
+        mTargetMode = false;
+        // setSpeed(mDefaultSpeed);
+      }
+    } else {
+      if(mAccelSpeed && mMotor.speed() == mMotor.maxSpeed()) {
+        mAccelSpeed = false;
+        mAccelRate = 1.0;
+      }
+      mMotor.runSpeed();  
+      if(mAccelSpeed) {
+        unsigned long t = millis();
+        if(t - mAccelTime > 200) {
+          mMotor.setSpeed(mMotor.speed() * mAccelRate); 
+          Serial.print("(MP) -> update(): speed: ");
+          Serial.println(mMotor.speed());
+          mAccelTime = t;
+        }
+      }
+    }
   }
 }
 
 
 void MotorProxy::start() {
-  if(!mRunning) {
+  if(!mActive) {
     Serial.println("(MP) -> start()");
-    mRunning = true;  
+    mActive = true;  
   }
 }
 
 
-bool MotorProxy::isRunning() {
-  return mRunning;
+void MotorProxy::setDefaultSpeed(uint16_t pSpeed) {
+  mDefaultSpeed = pSpeed;
+  setSpeed(pSpeed);
+}
+
+
+void MotorProxy::moveToTarget(uint16_t pPosition, float pAcceleration) {
+  mMotor.setAcceleration(pAcceleration);
+  mMotor.moveTo(pPosition);
+  mTargetMode = true;
+}
+
+
+void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pAccelRate) {
+  mMotor.setMaxSpeed(pMaxSpeed);
+  mMotor.setSpeed(pStartSpeed);
+  Serial.print("(MP) -> accelerateToSpeed(): speed: ");
+  Serial.println(mMotor.speed());
+  mAccelRate = pAccelRate;
+  mAccelStart = millis();
+  mAccelSpeed = true;
+}
+
+
+bool MotorProxy::isActive() {
+  return mActive;
+}
+
+
+bool MotorProxy::isInTargetMode() {
+  return mTargetMode;
+}
+
+
+bool MotorProxy::isInSpeedMode() {
+  return !mTargetMode;
+}
+
+
+void MotorProxy::setSpeed(uint16_t pSpeed) {
+  // The desired maximum speed in steps per second. Must be > 0.
+  mMotor.setMaxSpeed(pSpeed);
+  // Constant speed in steps per second. Positive is clockwise.
+  // Speeds of more than 1000 steps per second are unreliable.
+  mMotor.setSpeed(pSpeed);
 }

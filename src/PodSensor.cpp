@@ -17,6 +17,7 @@
 */
 
 #include "PodSensor.h"
+#include "MotorProxy.h"
 
 #define PS_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
@@ -48,13 +49,15 @@ SensorOrchestra* PodSensor::getConcreteParent() {
 void PodSensor::onClockBeatChange(unsigned long beat) {
   // check initial pulse at zero...
 #if PS_DEBUG
-  if(!getConcreteParent()->getMotor()->isRunning()) {
+  if(!getConcreteParent()->getMotor()->isActive()) {
     Serial.printf("(PS) -> onClockBeatChange(): pulse count is: %i\n", mPulseCount);  
   }
 #endif
   // start motor movement after delay has elapsed
-  if(mPulseCount >= mPulseDelay) {
-    getConcreteParent()->getMotor()->start();
+  MotorProxy* motor = getConcreteParent()->getMotor();
+  if(mPulseCount >= mPulseDelay && !motor->isActive()) {
+    motor->accelerateToSpeed(MotorProxy::FULL_REVOLUTION/16, 50, 1.25);
+    motor->start();
   }
   // therefore increment afterwards
   mPulseCount++;

@@ -28,13 +28,27 @@ class MotorProxy
 public:
   MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin);
   ~MotorProxy();
+  static const uint16_t FULL_REVOLUTION = 25600;
   void setZeroPosition();
   void update();
   void start();
-  bool isRunning();
+  void setDefaultSpeed(uint16_t pSpeed);
+  void moveToTarget(uint16_t pPosition, float pAcceleration);
+  void accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pAccelRate);
+  bool isActive();
+  bool isInTargetMode();
+  bool isInSpeedMode();
+  
 private:
+  void setSpeed(uint16_t pSpeed);
   AccelStepper mMotor;
-  bool mRunning = false;
+  uint16_t mDefaultSpeed = 0;
+  bool mActive = false;
+  bool mTargetMode = false;
+  bool mAccelSpeed = false;
+  float mAccelRate = 1.0;
+  unsigned long mAccelStart;
+  unsigned long mAccelTime;
 };
 
 
