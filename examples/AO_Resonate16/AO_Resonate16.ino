@@ -30,6 +30,7 @@
 #define LED_PIN 5
 #define INIT_DELAY 1000
 
+unsigned long mSensorTime = 0;
 SensorOrchestra* mOrchestra;
 
 // Forward declaration of callback functions
@@ -101,6 +102,9 @@ void setup() {
   Midi.setClockTickCallback(&onMidiClockTick);
   Midi.setClockStartCallback(&onMidiClockStart);
 
+  // turn on LED
+  // digitalWrite(LED_PIN, HIGH);
+
   // start orchestra
   mOrchestra->start();
 }
@@ -117,7 +121,11 @@ void loop() {
 
 
 void onSensorValue(uint16_t pValue) {
-  //Serial.printf("sensor value: %i\n", pValue);
+  unsigned long t = millis();
+  if(t - mSensorTime > 200) {
+    Serial.printf("sensor value: %i\n", pValue);
+    mSensorTime = t;
+  }
 }
 
 
