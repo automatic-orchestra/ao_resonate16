@@ -33,21 +33,16 @@ public:
   void update();
   void start();
   void setDefaultSpeed(uint16_t pSpeed);
-  void moveToTarget(uint16_t pPosition, float pAcceleration);
   void accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pAccelRate);
   bool isActive();
-  bool isInTargetMode();
-  bool isInSpeedMode();
   void setMessageCallback(void (*pCallback)(uint8_t, uint16_t));
-  bool isAccelerating();
 private:
   void setSpeed(uint16_t pSpeed);
   void sendCallback(uint8_t pMessage, uint16_t pValue = 0);
   AccelStepper mMotor;
   uint16_t mDefaultSpeed = 0;
   bool mActive = false;
-  bool mTargetMode = false;
-  bool mAccelSpeed = false;
+  bool mIsAccelerating = false;
   float mAccelRate = 1.0;
   unsigned long mAccelStart;
   unsigned long mAccelTime;

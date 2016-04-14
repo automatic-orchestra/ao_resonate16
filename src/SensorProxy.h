@@ -40,14 +40,11 @@ private:
   void sendMessage(uint8_t pMessage, uint16_t pValue = 0);
   void captureBufferValue();
 
-  uint16_t mBuffer[BUFFER_SIZE] = {};
   uint8_t mPin;
+  uint16_t mBuffer[BUFFER_SIZE] = {};
   bool mBuffering = false;
-  
-  
   unsigned long mLastBufferTime = 0;
   uint16_t mBufferIndex = 0;
-  
 };
 
 

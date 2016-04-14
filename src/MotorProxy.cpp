@@ -29,7 +29,6 @@ MotorProxy::MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin) {
 
 
 MotorProxy::~MotorProxy() {
-
 }
 
 
@@ -47,27 +46,22 @@ void MotorProxy::setZeroPosition() {
 
 void MotorProxy::update() {
   if(mActive) {
-    if(mTargetMode) {
-      mMotor.run();
-      if(!mMotor.isRunning()) {
-        mTargetMode = false;
-        // setSpeed(mDefaultSpeed);
-      }
-    } else {
-      if(mAccelSpeed && mMotor.speed() == mMotor.maxSpeed()) {
-        mAccelSpeed = false;
-        mAccelRate = 1.0;
-        sendCallback(MotorMessages::ACCELERATION_DONE);
-      }
-      mMotor.runSpeed();  
-      if(mAccelSpeed) {
-        unsigned long t = millis();
-        if(t - mAccelTime > 200) {
-          mMotor.setSpeed(mMotor.speed() * mAccelRate); 
-          Serial.print("(MP) -> update(): speed: ");
-          Serial.println(mMotor.speed());
-          mAccelTime = t;
-        }
+    // check if acceleration is done
+    if(mIsAccelerating && mMotor.speed() == mMotor.maxSpeed()) {
+      mIsAccelerating = false;
+      mAccelRate = 1.0;
+      sendCallback(MotorMessages::ACCELERATION_DONE);
+    }
+    // update motor
+    mMotor.runSpeed();  
+    // calculate new acceleration motor speed
+    if(mIsAccelerating) {
+      unsigned long t = millis();
+      if(t - mAccelTime > 200) {
+        mMotor.setSpeed(mMotor.speed() * mAccelRate); 
+        Serial.print("(MP) -> update(): speed: ");
+        Serial.println(mMotor.speed());
+        mAccelTime = t;
       }
     }
   }
@@ -88,13 +82,6 @@ void MotorProxy::setDefaultSpeed(uint16_t pSpeed) {
 }
 
 
-void MotorProxy::moveToTarget(uint16_t pPosition, float pAcceleration) {
-  mMotor.setAcceleration(pAcceleration);
-  mMotor.moveTo(pPosition);
-  mTargetMode = true;
-}
-
-
 void MotorProxy::setMessageCallback(void (*pCallback)(uint8_t, uint16_t)) {
   mCallback = pCallback;
 }
@@ -107,27 +94,12 @@ void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, flo
   Serial.println(mMotor.speed());
   mAccelRate = pAccelRate;
   mAccelStart = millis();
-  mAccelSpeed = true;
+  mIsAccelerating = true;
 }
 
 
 bool MotorProxy::isActive() {
   return mActive;
-}
-
-
-bool MotorProxy::isInTargetMode() {
-  return mTargetMode;
-}
-
-
-bool MotorProxy::isInSpeedMode() {
-  return !mTargetMode;
-}
-
-
-bool MotorProxy::isAccelerating() {
-  return mAccelSpeed;
 }
 
 
