@@ -22,7 +22,7 @@
 #include "MotorMessages.h"
 #include "SensorMessages.h"
 
-#define PS_DEBUG true
+#define SP_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
 
 
@@ -31,7 +31,7 @@ PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   int midiChannel = getParent()->getChannel();
   // calculate delay in pulses
   mPulseDelay = midiChannel * CHANNEL_DELAY_INCREMENT;
-#if PS_DEBUG
+#if SP_DEBUG
   Serial.printf("(PS) -> constructor(): pulse delay is: %i\n", mPulseDelay);  
 #endif
 }
@@ -51,9 +51,11 @@ SensorOrchestra* PodSensor::getConcreteParent() {
 
 void PodSensor::onClockBeatChange(unsigned long beat) {
   // check initial pulse at zero...
-#if PS_DEBUG
+#if SP_DEBUG
   if(!getConcreteParent()->getMotor()->isActive()) {
+    #if SP_DEBUG
     Serial.printf("(PS) -> onClockBeatChange(): pulse count is: %i\n", mPulseCount);  
+    #endif
   }
 #endif
   // start motor movement after delay has elapsed
@@ -69,7 +71,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 
 
 void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
-#if PS_DEBUG
+#if SP_DEBUG
   Serial.printf("(PS) -> onMotorMessage(): message: %i - value: %i", pMessage, pValue);
 #endif
   switch(pMessage) {
@@ -77,17 +79,20 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       // start buffering phase
       getConcreteParent()->getSensor()->startBuffering();
       break;
+      case MotorMessages::TURNS_DONE:
+        // start decelleration phase
+        getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+      break;
   }
 }
 
 
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
-#if PS_DEBUG
+#if SP_DEBUG
   Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i", pMessage, pValue);
   switch(pMessage) {
     case SensorMessages::BUFFER_FULL:
-      // start decelleration phase
-      getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+      getConcreteParent()->getMotor()->turnAtSpeed(1600,1);
       break;
   }
 #endif

@@ -19,7 +19,7 @@
 #include "MotorProxy.h"
 #include "MotorMessages.h"
 
-#define MP_DEBUG false
+#define MP_DEBUG true
 
 
 MotorProxy::MotorProxy(uint8_t pDirectionPin, uint8_t pStepPin) {
@@ -33,7 +33,9 @@ MotorProxy::~MotorProxy() {
 
 
 void MotorProxy::setZeroPosition() {
+  #if MP_DEBUG
   Serial.println("(MP) -> setZeroPosition()");
+  #endif
   // Resets the current position of the motor, so that wherever the motor
   // happens to be right now is considered to be the new 0 position. Useful
   // for setting a zero position on a stepper after an initial hardware
@@ -66,8 +68,10 @@ void MotorProxy::update() {
       unsigned long t = millis();
       if(t - mTime > 200) {
         mMotor.setSpeed(mMotor.speed() * mAccelRate); 
+        #if MP_DEBUG
         Serial.print("(MP) -> update(): speed: ");
         Serial.println(mMotor.speed());
+        #endif
         mTime = t;
       }
     }
@@ -76,10 +80,24 @@ void MotorProxy::update() {
       unsigned long t = millis();
       if(t - mTime > 200) {
         mMotor.setSpeed(mMotor.speed() * mDecelRate); 
+        #if MP_DEBUG
         Serial.print("(MP) -> update(): speed: ");
         Serial.println(mMotor.speed());
+        #endif
         mTime = t;
       } 
+    }
+    // check turns in turnAtSpeed mode
+    if (mIsTurning) {
+      if (mMotor.currentPosition() >= mTurnEnd)
+      {
+        #if MP_DEBUG
+        Serial.println("(MP) -> update(): motor turns completed! ");
+        #endif
+        mIsTurning = false;
+        sendCallback(MotorMessages::TURNS_DONE);
+
+      }
     }
   }
 }
@@ -87,7 +105,9 @@ void MotorProxy::update() {
 
 void MotorProxy::start() {
   if(!mActive) {
+    #if MP_DEBUG
     Serial.println("(MP) -> start()");
+    #endif
     mActive = true;  
   }
 }
@@ -107,11 +127,28 @@ void MotorProxy::setMessageCallback(void (*pCallback)(uint8_t, uint16_t)) {
 void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pRate) {
   mMotor.setMaxSpeed(pMaxSpeed);
   mMotor.setSpeed(pStartSpeed);
+  #if MP_DEBUG
   Serial.print("(MP) -> accelerateToSpeed(): speed: ");
+  #endif
   Serial.println(mMotor.speed());
   mAccelRate = pRate;
   mTime = millis();
   mIsAccelerating = true;
+}
+
+void MotorProxy::turnAtSpeed(uint16_t speed,uint8_t turns) {
+  mMotor.setSpeed(speed);
+  mIsTurning = true;
+  mTurnStart = mMotor.currentPosition();
+  mTurnEnd = mTurnStart + (25600*turns);
+  #if MP_DEBUG
+  Serial.print("(MP) -> turnAtFullSpeed(): turns: ");
+  Serial.print(turns);
+  Serial.print(" startPosition: ");
+  Serial.print(mTurnStart);
+  Serial.print(" endPosition: ");
+  Serial.println(mTurnEnd);
+  #endif
 }
 
 
@@ -143,3 +180,5 @@ void MotorProxy::sendCallback(uint8_t pMessage, uint16_t pValue) {
     (*mCallback)(pMessage, pValue);
   }
 }
+
+

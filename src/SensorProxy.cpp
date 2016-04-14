@@ -19,7 +19,7 @@
 #include "SensorProxy.h"
 #include "SensorMessages.h"
 
-#define PS_DEBUG true
+#define SP_DEBUG true
 
 
 SensorProxy::SensorProxy(uint8_t pPin) : mPin(pPin) {
@@ -51,7 +51,7 @@ void SensorProxy::update() {
 
 
 void SensorProxy::startBuffering() {
-  #if PS_DEBUG
+  #if SP_DEBUG
     Serial.println("(SP) -> startBuffering()");
   #endif
   mLastBufferTime = micros();
@@ -74,7 +74,7 @@ void SensorProxy::sendMessage(uint8_t pMessage, uint16_t pValue) {
 
 void SensorProxy::captureBufferValue() {
   if(mBufferIndex == BUFFER_SIZE) {
-    #if PS_DEBUG
+    #if SP_DEBUG
       Serial.println("(SP) -> captureBufferValue(): Buffer is full.");
     #endif
     sendMessage(SensorMessages::BUFFER_FULL);
@@ -83,7 +83,7 @@ void SensorProxy::captureBufferValue() {
     uint16_t pinValue = analogRead(mPin);
     mBuffer[mBufferIndex] = pinValue;
     mapSensorToNote();
-    #if PS_DEBUG
+    #if SP_DEBUG
       Serial.print("(SP) -> captureBufferValue(): wrote value to buffer: ");
       Serial.println(mBuffer[mBufferIndex]);
       Serial.print("(SP) -> mapSensorToNote(): mapped value to note: ");
