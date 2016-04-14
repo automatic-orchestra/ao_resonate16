@@ -39,9 +39,12 @@ private:
   void (*mCallback)(uint8_t, uint16_t) = NULL;
   void sendMessage(uint8_t pMessage, uint16_t pValue = 0);
   void captureBufferValue();
+  void mapSensorToNote();
 
   uint8_t mPin;
   uint16_t mBuffer[BUFFER_SIZE] = {};
+  uint16_t mNotes[BUFFER_SIZE] = {};
+
   bool mBuffering = false;
   unsigned long mLastBufferTime = 0;
   uint16_t mBufferIndex = 0;

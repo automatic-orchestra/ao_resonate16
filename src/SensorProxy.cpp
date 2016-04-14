@@ -76,8 +76,21 @@ void SensorProxy::captureBufferValue() {
   } else {
     uint16_t pinValue = analogRead(mPin);
     mBuffer[mBufferIndex] = pinValue;
+    mapSensorToNote();
     Serial.print("(SP) -> captureBufferValue(): wrote value to buffer: ");
     Serial.println(mBuffer[mBufferIndex]);
+    Serial.print("(SP) -> mapSensorToNote(): mapped value to note: ");
+    Serial.println(mNotes[mBufferIndex]);
     mBufferIndex++;
   }  
 }
+
+void SensorProxy::mapSensorToNote() {
+  mNotes[mBufferIndex] = map(mBuffer[mBufferIndex],0,1023,36,95);
+}
+
+
+
+
+
+
