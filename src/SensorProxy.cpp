@@ -17,32 +17,67 @@
 */
 
 #include "SensorProxy.h"
+#include "SensorMessages.h"
 
 
 SensorProxy::SensorProxy(uint8_t pPin) : mPin(pPin) {
-  mBuffer = new uint16_t[BUFFER_SIZE];
-  mNormalizer = new Normalizer();
 }
 
 
 SensorProxy::~SensorProxy() {
-  delete mBuffer;
-  delete mNormalizer;
+  delete[] mBuffer;
 }
 
 
 void SensorProxy::update() {
-  uint16_t pinValue = analogRead(mPin);
-  mNormalizer->push(pinValue);
-  if(mNormalizer->hasNew()) {
-    //TODO write value into buffer
-    if (mValueCallback != NULL) {
-        (*mValueCallback)(mNormalizer->get());
-    }
+  // uint16_t pinValue = analogRead(mPin);
+  // mNormalizer->push(pinValue);
+  // if(mNormalizer->hasNew()) {
+  //   //TODO write value into buffer
+  //   if (mValueCallback != NULL) {
+  //       (*mValueCallback)(mNormalizer->get());
+  //   }
+  // }
+  if(mBuffering) {
+    unsigned long t = micros();
+    if(t - mLastBufferTime >= BUFFER_CAPTURE_TIME_OFFSET) {
+      captureBufferValue();
+      mLastBufferTime = t;
+    } 
   }
 }
 
 
-void SensorProxy::setValueCallback(void (*pValueCallback)(uint16_t)) {
-  mValueCallback = pValueCallback;
+void SensorProxy::startBuffering() {
+  Serial.println("(SP) -> startBuffering()");
+  mLastBufferTime = micros();
+  captureBufferValue();  
+  mBuffering = true;
+}
+
+
+void SensorProxy::setMessageCallback(void (*pCallback)(uint8_t, uint16_t)) {
+  mCallback = pCallback;
+}
+
+
+void SensorProxy::sendMessage(uint8_t pMessage, uint16_t pValue) {
+  if(mCallback) {
+    (* mCallback)(pMessage, pValue);
+  }
+}
+
+
+void SensorProxy::captureBufferValue() {
+  if(mBufferIndex == BUFFER_SIZE) {
+    Serial.println("(SP) -> captureBufferValue(): Buffer is full.");
+    sendMessage(SensorMessages::BUFFER_FULL);
+    mBuffering = false;
+  } else {
+    uint16_t pinValue = analogRead(mPin);
+    mBuffer[mBufferIndex] = pinValue;
+    Serial.print("(SP) -> captureBufferValue(): wrote value to buffer: ");
+    Serial.println(mBuffer[mBufferIndex]);
+    mBufferIndex++;
+  }  
 }

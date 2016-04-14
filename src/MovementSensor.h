@@ -24,6 +24,8 @@
 #include "SensorOrchestra.h"
 #include "Pod.h"
 
+class PodSensor;
+
 
 class MovementSensor : public Movement
 {
@@ -31,9 +33,12 @@ public:
   MovementSensor(Orchestra* pParent, int pNextMovement);
   ~MovementSensor();
   Pod* getPod();
+  PodSensor* getConcretePod();
   String getName();
   int isFinished();
   void onClockBeatChange(unsigned long beat);
+  void onMotorMessage(uint8_t pMessage, uint16_t pValue);
+  void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 private:
   Pod* mPod;
 };

@@ -17,6 +17,7 @@
 */
 
 #include "MotorProxy.h"
+#include "MotorMessages.h"
 
 #define MP_DEBUG false
 
@@ -56,6 +57,7 @@ void MotorProxy::update() {
       if(mAccelSpeed && mMotor.speed() == mMotor.maxSpeed()) {
         mAccelSpeed = false;
         mAccelRate = 1.0;
+        sendCallback(MotorMessages::ACCELERATION_DONE);
       }
       mMotor.runSpeed();  
       if(mAccelSpeed) {
@@ -93,6 +95,11 @@ void MotorProxy::moveToTarget(uint16_t pPosition, float pAcceleration) {
 }
 
 
+void MotorProxy::setMessageCallback(void (*pCallback)(uint8_t, uint16_t)) {
+  mCallback = pCallback;
+}
+
+
 void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pAccelRate) {
   mMotor.setMaxSpeed(pMaxSpeed);
   mMotor.setSpeed(pStartSpeed);
@@ -119,10 +126,22 @@ bool MotorProxy::isInSpeedMode() {
 }
 
 
+bool MotorProxy::isAccelerating() {
+  return mAccelSpeed;
+}
+
+
 void MotorProxy::setSpeed(uint16_t pSpeed) {
   // The desired maximum speed in steps per second. Must be > 0.
   mMotor.setMaxSpeed(pSpeed);
   // Constant speed in steps per second. Positive is clockwise.
   // Speeds of more than 1000 steps per second are unreliable.
   mMotor.setSpeed(pSpeed);
+}
+
+
+void MotorProxy::sendCallback(uint8_t pMessage, uint16_t pValue) {
+  if (mCallback != NULL) {
+    (*mCallback)(pMessage, pValue);
+  }
 }

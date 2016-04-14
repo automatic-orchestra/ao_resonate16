@@ -31,6 +31,8 @@ public:
   ~PodSensor();
   SensorOrchestra* getConcreteParent();
   void onClockBeatChange(unsigned long beat);
+  void onMotorMessage(uint8_t pMessage, uint16_t pValue);
+  void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 private:
   uint8_t mPulseDelay = 0;
   uint64_t mPulseCount = 0;

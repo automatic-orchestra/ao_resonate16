@@ -28,14 +28,26 @@ class SensorProxy
 public:
   SensorProxy(uint8_t pPin);
   ~SensorProxy();  
+  void setMessageCallback(void (*pCallback)(uint8_t, uint16_t));
   void update();
-  void setValueCallback(void (*pValueCallback)(uint16_t));
+  void startBuffering();
+  
 private:
-  static const uint16_t BUFFER_SIZE = 6400; // 200 steps and 1/32 microsteps
-  uint16_t* mBuffer;
-  Normalizer* mNormalizer;
+  static const uint16_t BUFFER_SIZE = 1600; // see NOTES.md for details
+  static const uint16_t BUFFER_CAPTURE_TIME_OFFSET = 10000; // see NOTES.md for details
+
+  void (*mCallback)(uint8_t, uint16_t) = NULL;
+  void sendMessage(uint8_t pMessage, uint16_t pValue = 0);
+  void captureBufferValue();
+
+  uint16_t mBuffer[BUFFER_SIZE] = {};
   uint8_t mPin;
-  void (*mValueCallback)(uint16_t) = NULL;
+  bool mBuffering = false;
+  
+  
+  unsigned long mLastBufferTime = 0;
+  uint16_t mBufferIndex = 0;
+  
 };
 
 

@@ -21,6 +21,7 @@
 #include "MacAddress.h"
 #include "CFOMidi.h"
 #include "Movement.h"
+#include "MovementSensor.h"
 
 #define MAC_ADDRESS_COUNT 7
 
@@ -114,6 +115,12 @@ void SensorOrchestra::update() {
     }
 }
 
+MovementSensor* SensorOrchestra::getCurrentMovement() {
+    // upcast from base class Movement to concrete class MovementSensor
+    // http://www.cplusplus.com/doc/tutorial/typecasting/
+    return static_cast<MovementSensor*>(mCurrentMovement);
+}
+
 
 void SensorOrchestra::onClockStart() {
     Serial.println("(SO) -> onClockStart()");
@@ -134,6 +141,20 @@ void SensorOrchestra::onClockStart() {
 void SensorOrchestra::changeMovement(int pMovementID) {
     mClock->reset();
     Orchestra::changeMovement(pMovementID);
+}
+
+
+void SensorOrchestra::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
+    if(mCurrentMovement) {
+        getCurrentMovement()->onMotorMessage(pMessage, pValue);
+    }
+}
+
+
+void SensorOrchestra::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
+    if(mCurrentMovement) {
+        getCurrentMovement()->onSensorMessage(pMessage, pValue);
+    }   
 }
 
 

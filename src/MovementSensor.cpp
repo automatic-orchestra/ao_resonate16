@@ -36,6 +36,13 @@ Pod* MovementSensor::getPod() {
 }
 
 
+PodSensor* MovementSensor::getConcretePod() {
+  // upcast from base class Pod to concrete class PodSensor
+  // http://www.cplusplus.com/doc/tutorial/typecasting/
+  return static_cast<PodSensor*>(mPod);
+}
+
+
 String MovementSensor::getName() {
   return "MovementSensor (MS)";
 }
@@ -52,4 +59,14 @@ int MovementSensor::isFinished() {
 
 void MovementSensor::onClockBeatChange(unsigned long beat) {
   Movement::onClockBeatChange(beat);
+}
+
+
+void MovementSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
+  getConcretePod()->onMotorMessage(pMessage, pValue);
+}
+
+
+void MovementSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
+  getConcretePod()->onSensorMessage(pMessage, pValue);
 }

@@ -25,6 +25,8 @@
 #include "SensorProxy.h"
 #include "PulseClock.h"
 
+class MovementSensor;
+
 
 class SensorOrchestra : public Orchestra
 {
@@ -39,10 +41,15 @@ public:
   PulseClock* getClock();
   void start();
   void update();
+  // sensor specific functions
+  MovementSensor* getCurrentMovement();
   // MIDI message methods
   void onClockStart();
   // movement handling
   void changeMovement(int pMovementID);
+  // sensor handling
+  void onMotorMessage(uint8_t pMessage, uint16_t pValue);
+  void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 private:
   MotorProxy* mMotor = nullptr;
   SensorProxy* mSensor = nullptr;

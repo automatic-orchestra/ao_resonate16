@@ -39,6 +39,8 @@ void onMidiNoteOff(byte channel, byte note, byte velocity);
 void onMidiControlChange(byte channel, byte control, byte value);
 void onMidiClockTick();
 void onMidiClockStart();
+void onMotorMessage(uint8_t pMessage, uint16_t pValue);
+void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 
 
 void setup() {
@@ -52,9 +54,10 @@ void setup() {
   mOrchestra = new SensorOrchestra();
   // setup motor
   mOrchestra->setMotor(new MotorProxy(MOTOR_DIR_PIN, MOTOR_STEP_PIN));
+  mOrchestra->getMotor()->setMessageCallback(&onMotorMessage);
   // setup sensor
   mOrchestra->setSensor(new SensorProxy(SENSOR_PIN));
-  mOrchestra->getSensor()->setValueCallback(&onSensorValue);
+  mOrchestra->getSensor()->setMessageCallback(&onSensorMessage);
   // setup playlist
   mOrchestra->setPlaylist(new SensorPlaylist());
   // setup clock
@@ -64,7 +67,7 @@ void setup() {
   Music.init();
   Music.enableEnvelope1();
   Music.enableEnvelope2();
-  Music.getPreset(13);
+  Music.getPreset(21);
 
   // Initializy orchestra MIDI interface
   Midi.init();
@@ -103,12 +106,14 @@ void setup() {
   Midi.setClockStartCallback(&onMidiClockStart);
 
   // turn on LED
-  // digitalWrite(LED_PIN, HIGH);
+  analogWrite(LED_PIN, 100);
 
   // start orchestra
   mOrchestra->start();
 }
 
+unsigned long time = millis();
+bool on = false;
 
 void loop() {
   // update orchestra
@@ -117,15 +122,33 @@ void loop() {
   usbMIDI.read();
   // process incoming MIDI interface data
   Midi.checkSerialMidi();
+
+  unsigned long t = millis();
+  if(t - time > 500) {
+    // if(on){
+    //   Music.noteOff();
+    //   on = false;  
+    // } else {
+      Music.noteOn(random(36, 95), 127);
+      on = true;  
+    // }
+    time = t;
+  }
 }
 
 
-void onSensorValue(uint16_t pValue) {
-  unsigned long t = millis();
-  if(t - mSensorTime > 200) {
-    Serial.printf("sensor value: %i\n", pValue);
-    mSensorTime = t;
-  }
+// ----------------------------
+//  Motor and Sensor callbacks
+// ----------------------------
+
+
+void onMotorMessage(uint8_t pMessage, uint16_t pValue) {
+  mOrchestra->onMotorMessage(pMessage, pValue);
+}
+
+
+void onSensorMessage(uint8_t pMessage, uint16_t pValue) {
+  mOrchestra->onSensorMessage(pMessage, pValue);
 }
 
 
