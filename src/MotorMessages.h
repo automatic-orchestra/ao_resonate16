@@ -7,6 +7,7 @@ class MotorMessages
 {
 public:
   static const uint8_t ACCELERATION_DONE = 1;
+  static const uint8_t DECELERATION_DONE = 2;
   ~MotorMessages();
 private:
   MotorMessages();

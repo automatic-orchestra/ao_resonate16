@@ -52,17 +52,34 @@ void MotorProxy::update() {
       mAccelRate = 1.0;
       sendCallback(MotorMessages::ACCELERATION_DONE);
     }
+    // check if deceleration is done
+    if(mIsDecelerating && (int) mMotor.speed() <= mDecelEndSpeed) {
+      mMotor.setSpeed(0);
+      mIsDecelerating = false;
+      mDecelRate = 1.0;
+      sendCallback(MotorMessages::DECELERATION_DONE);
+    }
     // update motor
     mMotor.runSpeed();  
     // calculate new acceleration motor speed
     if(mIsAccelerating) {
       unsigned long t = millis();
-      if(t - mAccelTime > 200) {
+      if(t - mTime > 200) {
         mMotor.setSpeed(mMotor.speed() * mAccelRate); 
         Serial.print("(MP) -> update(): speed: ");
         Serial.println(mMotor.speed());
-        mAccelTime = t;
+        mTime = t;
       }
+    }
+    // calculate deceleration motor speed
+    if(mIsDecelerating) {
+      unsigned long t = millis();
+      if(t - mTime > 200) {
+        mMotor.setSpeed(mMotor.speed() * mDecelRate); 
+        Serial.print("(MP) -> update(): speed: ");
+        Serial.println(mMotor.speed());
+        mTime = t;
+      } 
     }
   }
 }
@@ -87,14 +104,23 @@ void MotorProxy::setMessageCallback(void (*pCallback)(uint8_t, uint16_t)) {
 }
 
 
-void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pAccelRate) {
+void MotorProxy::accelerateToSpeed(uint16_t pMaxSpeed, uint16_t pStartSpeed, float pRate) {
   mMotor.setMaxSpeed(pMaxSpeed);
   mMotor.setSpeed(pStartSpeed);
   Serial.print("(MP) -> accelerateToSpeed(): speed: ");
   Serial.println(mMotor.speed());
-  mAccelRate = pAccelRate;
-  mAccelStart = millis();
+  mAccelRate = pRate;
+  mTime = millis();
   mIsAccelerating = true;
+}
+
+
+void MotorProxy::decelerateToSpeed(uint16_t pEndSpeed, float pRate) {
+  mDecelEndSpeed = pEndSpeed;
+  mDecelRate = pRate;
+  mMotor.setSpeed(mMotor.speed() * mDecelRate); 
+  mTime = millis();
+  mIsDecelerating = true;
 }
 
 

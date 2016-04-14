@@ -20,6 +20,7 @@
 #include "MotorProxy.h"
 #include "CFOSynthesizer.h"
 #include "MotorMessages.h"
+#include "SensorMessages.h"
 
 #define PS_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
@@ -58,7 +59,8 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
   // start motor movement after delay has elapsed
   MotorProxy* motor = getConcreteParent()->getMotor();
   if(mPulseCount >= mPulseDelay && !motor->isActive()) {
-    motor->accelerateToSpeed(12000, 50, 1.25);
+    // start acceleration phase
+    motor->accelerateToSpeed(1600, 50, 1.25);
     motor->start();
   }
   // therefore increment afterwards
@@ -72,6 +74,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 #endif
   switch(pMessage) {
     case MotorMessages::ACCELERATION_DONE:
+      // start buffering phase
       getConcreteParent()->getSensor()->startBuffering();
       break;
   }
@@ -81,6 +84,12 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
 #if PS_DEBUG
   Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i", pMessage, pValue);
+  switch(pMessage) {
+    case SensorMessages::BUFFER_FULL:
+      // start decelleration phase
+      getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+      break;
+  }
 #endif
 }
 
