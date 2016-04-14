@@ -129,7 +129,7 @@ void loop() {
     //   Music.noteOff();
     //   on = false;  
     // } else {
-      Music.noteOn(random(36, 95), 127);
+      // Music.noteOn(random(36, 95), 127);
       on = true;  
     // }
     time = t;
