@@ -70,3 +70,5 @@ void MovementSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 void MovementSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
   getConcretePod()->onSensorMessage(pMessage, pValue);
 }
+
+

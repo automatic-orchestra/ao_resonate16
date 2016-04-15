@@ -38,11 +38,11 @@ public:
   void decelerateToSpeed(uint16_t pEndSpeed, float pAccelRate);
   void turnAtSpeed(uint16_t speed,uint8_t turns);
   bool isActive();
+  AccelStepper mMotor;
   
 private:
   void setSpeed(uint16_t pSpeed);
   void sendCallback(uint8_t pMessage, uint16_t pValue = 0);
-  AccelStepper mMotor;
   uint16_t mDefaultSpeed = 0;
   bool mActive = false;
   bool mIsAccelerating = false;

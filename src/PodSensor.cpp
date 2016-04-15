@@ -75,30 +75,57 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
   Serial.printf("(PS) -> onMotorMessage(): message: %i - value: %i", pMessage, pValue);
 #endif
   switch(pMessage) {
+
     case MotorMessages::ACCELERATION_DONE:
       // start buffering phase
       getConcreteParent()->getSensor()->startBuffering();
       break;
+
       case MotorMessages::TURNS_DONE:
-        // start decelleration phase
-        getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+        if (pIsMeister)
+        {
+          getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+        }
       break;
   }
 }
 
 
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
-#if SP_DEBUG
-  Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i", pMessage, pValue);
+  #if SP_DEBUG
+    Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i", pMessage, pValue);
+  #endif
   switch(pMessage) {
     case SensorMessages::BUFFER_FULL:
-      getConcreteParent()->getMotor()->turnAtSpeed(1600,1);
+        //Check if it is the Meister to assemble constant turns
+      if (pIsMeister)
+      {
+        //Is Meister, run more
+        getConcreteParent()->getMotor()->turnAtSpeed(1600,1);
+      }
+      else
+      {
+        //-> INCLUDE TURN THE VOLUME OF THE SYNTH DOWN
+        getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+      }
+      
+      break;
+
+      case SensorMessages::SENSOR_READING:
+        pNotes[bufferCounter] = map(pValue,0,1023,36,95);
+        pPositions[bufferCounter] = getConcreteParent()->getMotor()->mMotor.currentPosition();
+        #if SP_DEBUG
+          Serial.print("(PS) -> onSensorMessage(): index: ");
+          Serial.print(bufferCounter);
+          Serial.print(" pNote: ");
+          Serial.print(pNotes[bufferCounter]);
+          Serial.print(" pPositions: ");
+          Serial.println(pPositions[bufferCounter]);
+        #endif
+        bufferCounter++;
       break;
   }
-#endif
 }
-
-
 
 
 

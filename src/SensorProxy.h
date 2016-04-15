@@ -31,7 +31,7 @@ public:
   void setMessageCallback(void (*pCallback)(uint8_t, uint16_t));
   void update();
   void startBuffering();
-  
+
 private:
   static const uint16_t BUFFER_SIZE = 1600; // see NOTES.md for details
   static const uint16_t BUFFER_CAPTURE_TIME_OFFSET = 10000; // see NOTES.md for details
@@ -39,11 +39,9 @@ private:
   void (*mCallback)(uint8_t, uint16_t) = NULL;
   void sendMessage(uint8_t pMessage, uint16_t pValue = 0);
   void captureBufferValue();
-  void mapSensorToNote();
 
   uint8_t mPin;
   uint16_t mBuffer[BUFFER_SIZE] = {};
-  uint16_t mNotes[BUFFER_SIZE] = {};
 
   bool mBuffering = false;
   unsigned long mLastBufferTime = 0;
