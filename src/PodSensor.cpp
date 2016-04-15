@@ -72,7 +72,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
   MotorProxy* motor = getConcreteParent()->getMotor();
   if(mPulseCount >= mPulseDelay && !motor->isActive()) {
     // start acceleration phase
-    motor->accelerateToSpeed(1600, 50, 1.25);
+    motor->accelerateToSpeed(3200, 50, 1.25);
     motor->start();
   }
 
@@ -419,7 +419,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
       if (pIsMeister)
       {
         //Is Meister, run more
-        getConcreteParent()->getMotor()->turnAtSpeed(1600,1);
+        getConcreteParent()->getMotor()->turnAtSpeed(3200,1);
       }
       else
       {

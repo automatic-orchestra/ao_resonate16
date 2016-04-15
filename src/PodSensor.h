@@ -54,7 +54,7 @@ public:
   int lastIndex = 0;
   uint16_t pMeisterNoteIndex;
   uint16_t pNoteToFollowIndex;
-  static const uint16_t BUFFER_SIZE = 1600; // see NOTES.md for details
+  static const uint16_t BUFFER_SIZE = 800; // see NOTES.md for details
   uint16_t pNotes[BUFFER_SIZE] = {};
   unsigned long pPositions[BUFFER_SIZE] = {};
   // unsigned long pRealPosition = 0;

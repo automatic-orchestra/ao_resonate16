@@ -33,7 +33,7 @@ public:
   void startBuffering();
 
 private:
-  static const uint16_t BUFFER_SIZE = 1600; // see NOTES.md for details
+  static const uint16_t BUFFER_SIZE = 800; // see NOTES.md for details
   static const uint16_t BUFFER_CAPTURE_TIME_OFFSET = 10000; // see NOTES.md for details
 
   void (*mCallback)(uint8_t, uint16_t) = NULL;
