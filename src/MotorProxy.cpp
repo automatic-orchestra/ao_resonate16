@@ -43,6 +43,8 @@ void MotorProxy::setZeroPosition() {
   mMotor.setCurrentPosition(0);
   // set speed to actual speed again
   mMotor.setSpeed(mDefaultSpeed);
+  // fixed motor direction
+  mMotor.setPinsInverted(true);
 }
 
 
