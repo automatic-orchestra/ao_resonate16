@@ -262,7 +262,7 @@ void PodSensor::updateRealPosition()
 {
   long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
   long div = mpos/getConcreteParent()->getMotor()->FULL_REVOLUTION;
-  pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION - pPositions[0]);
+  pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION + pPositions[0]);
   #if SP_DEBUG
   Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
   Serial.println(pRealPosition);
