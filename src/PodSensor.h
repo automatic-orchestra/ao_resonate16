@@ -41,12 +41,12 @@ public:
   void pGoToNote();
 
   uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
-  int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
+  unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
   uint8_t tuneRange = 1; //both up and down
-  int meisterOrder[6] = {0,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
-  int accelPattern[6] = {250,500,1000,1500,2250}; //increasing acceleration of "seeking" notes, related to above
-  int maxSpeedPattern[6] = {500,1250,2000,3000,5000}; //increasing max speed of "seeking" notes, related to above
-  int pulseTimings[7] = {600,1800,2900,3900,4800,5400,6000}; //lookup table for main timming triggers. first is intro, rest is related to the notes, last to the ending.
+  unsigned int meisterOrder[6] = {0,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
+  unsigned int accelPattern[6] = {250,500,1000,1500,2250}; //increasing acceleration of "seeking" notes, related to above
+  unsigned int maxSpeedPattern[6] = {500,1250,2000,3000,5000}; //increasing max speed of "seeking" notes, related to above
+  unsigned int pulseTimings[7] = {600,1800,2900,3900,4800,5400,6000}; //lookup table for main timming triggers. first is intro, rest is related to the notes, last to the ending.
   int lastIndex = 0;
   uint16_t pMeisterNoteIndex;
   uint16_t pNoteToFollowIndex;
@@ -61,7 +61,7 @@ private:
   uint8_t mPulseDelay = 0;
   uint64_t mPulseCount = 0;
   uint16_t bufferCounter = 0;
-  int midiChannel;
+  unsigned int midiChannel;
 };
 
 
