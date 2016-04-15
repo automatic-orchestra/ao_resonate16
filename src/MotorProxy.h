@@ -42,6 +42,7 @@ public:
   void setSpeed(uint16_t pSpeed);
   void moveToPosition(unsigned long pos, uint16_t acceleration, uint16_t maxspeed);
   long relativeToAbsolutePosition(long pRelativePos);
+  int posToGo = 0;
   
 private:
   void sendCallback(uint8_t pMessage, uint16_t pValue = 0);

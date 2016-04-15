@@ -109,7 +109,7 @@ void MotorProxy::update() {
     }
 
     // check if is moving to position (accelerated, tuning)
-    if (mIsMovingToPosition && mMotor.distanceToGo() == 0) {
+    if (mIsMovingToPosition && mMotor.currentPosition() == posToGo) {
       mIsMovingToPosition = false;
       Serial.println("(MP) -> update(): reached note, begin again");
       sendCallback(MotorMessages::TUNING_DONE);
@@ -123,6 +123,7 @@ void MotorProxy::moveToPosition(unsigned long pos, uint16_t acceleration, uint16
   mMotor.setMaxSpeed(12000);
   mMotor.setAcceleration(acceleration);
   mMotor.moveTo(pos);
+  posToGo = pos;
   mIsMovingToPosition = true;
   Serial.printf("(MP) -> moveToPosition(): new pos: %i\n", pos);
   Serial.printf("(MP) -> moveToPosition(): distance to go: %i\n", mMotor.distanceToGo());
