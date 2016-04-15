@@ -40,6 +40,7 @@ public:
   bool isActive();
   AccelStepper mMotor;
   void setSpeed(uint16_t pSpeed);
+  void moveToPosition(unsigned long pos, uint16_t acceleration, uint16_t maxspeed);
   
 private:
   void sendCallback(uint8_t pMessage, uint16_t pValue = 0);
@@ -48,6 +49,7 @@ private:
   bool mIsAccelerating = false;
   bool mIsDecelerating = false;
   bool mIsTurning = false;
+  bool mIsMovingToPosition = false;
   float mAccelRate = 1.0;
   float mDecelRate = 1.0;
   uint16_t mDecelEndSpeed = 0;

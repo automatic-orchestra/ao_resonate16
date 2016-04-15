@@ -71,8 +71,6 @@ void MotorProxy::update() {
       mDecelRate = 1.0;
       sendCallback(MotorMessages::DECELERATION_DONE);
     }
-    // update motor
-    mMotor.runSpeed();  
     // calculate new acceleration motor speed
     if(mIsAccelerating) {
       unsigned long t = millis();
@@ -97,7 +95,7 @@ void MotorProxy::update() {
         mTime = t;
       } 
     }
-    // check turns in turnAtSpeed mode
+    // check turns in turnAtSpeed currentTuning
     if (mIsTurning) {
       if (mMotor.currentPosition() >= mTurnEnd)
       {
@@ -109,9 +107,36 @@ void MotorProxy::update() {
 
       }
     }
+    // check if is moving to position (accelerated, tuning)
+    if (mIsMovingToPosition)
+    {
+      if(mMotor.distanceToGo() == 0)
+      {
+        mIsMovingToPosition = false;
+        Serial.println("(MP) -> update(): reached note, begin again");
+        sendCallback(MotorMessages::TUNING_DONE);
+      }
+    }
+
+    // update motor
+    if (!mIsMovingToPosition)
+    {
+      mMotor.runSpeed();
+    }
+    else
+    {
+      mMotor.run();  
+    }
   }
 }
 
+void MotorProxy::moveToPosition(unsigned long pos, uint16_t acceleration, uint16_t maxspeed)
+{
+  mMotor.setMaxSpeed(12000);
+  mMotor.setAcceleration(acceleration);
+  mMotor.moveTo(pos);  
+  mIsMovingToPosition = true;
+}
 
 void MotorProxy::start() {
   if(!mActive) {
