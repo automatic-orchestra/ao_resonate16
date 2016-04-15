@@ -39,9 +39,9 @@ public:
   void turnAtSpeed(uint16_t speed,uint8_t turns);
   bool isActive();
   AccelStepper mMotor;
+  void setSpeed(uint16_t pSpeed);
   
 private:
-  void setSpeed(uint16_t pSpeed);
   void sendCallback(uint8_t pMessage, uint16_t pValue = 0);
   uint16_t mDefaultSpeed = 0;
   bool mActive = false;

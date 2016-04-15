@@ -84,7 +84,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       case MotorMessages::TURNS_DONE:
         if (pIsMeister)
         {
-          getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+          //getConcreteParent()->getMotor()->decelerateToPosition(50, 0.9);
         }
       break;
   }
