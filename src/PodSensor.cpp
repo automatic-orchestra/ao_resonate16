@@ -245,9 +245,13 @@ void PodSensor::pGoToNote()
   Serial.println("(PS) -> onMotorMessage(): Go to Current Note");
   #endif
   //Search for Note
-  updateRealPosition();
+  // updateRealPosition();
   updateNoteToFollowIndex();
-  getConcreteParent()->getMotor()->moveToPosition(pRealPosition+pPositions[pNoteToFollowIndex], accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
+  getConcreteParent()->getMotor()->moveToPosition(
+    getConcreteParent()->getMotor()->relativeToAbsolutePosition(pPositions[pNoteToFollowIndex]),
+    accelPattern[currentTuning],
+    maxSpeedPattern[currentTuning]
+  );
 }
 
 void PodSensor::pGoToLastNote()
@@ -256,9 +260,13 @@ void PodSensor::pGoToLastNote()
   Serial.println("(PS) -> onMotorMessage(): Go to the Last Note");
   #endif
   //Search for Note
-  updateRealPosition();
+  // updateRealPosition();
   updateNoteToFollowIndex();
-  getConcreteParent()->getMotor()->moveToPosition(pRealPosition+pPositions[pNoteToFollowIndex]+getConcreteParent()->getMotor()->FULL_REVOLUTION*3, accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
+  getConcreteParent()->getMotor()->moveToPosition(
+    getConcreteParent()->getMotor()->relativeToAbsolutePosition(pPositions[pNoteToFollowIndex] + MotorProxy::FULL_REVOLUTION * 3),
+    accelPattern[currentTuning],
+    maxSpeedPattern[currentTuning]
+  );
   lastDrone = true;
 }
 
@@ -285,7 +293,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       case MotorMessages::DECELERATION_DONE:
         if (pIsMeister)
         {
-          updateRealPosition();
+          // updateRealPosition();
           updateMeisterNoteIndex();
         }
         else
@@ -337,17 +345,17 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
   }
 }
 
-void PodSensor::updateRealPosition()
-{
-  long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
-  long div = mpos/getConcreteParent()->getMotor()->FULL_REVOLUTION;
-  pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION + pPositions[0]);
-  #if SP_DEBUG
-  Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
-  Serial.println(pRealPosition);
-  Serial.printf("(PS) -> updateRealPosition(): pulse: %i\n", mPulseCount);  
-  #endif
-}
+// void PodSensor::updateRealPosition()
+// {
+//   long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
+//   long div = mpos/getConcreteParent()->getMotor()->FULL_REVOLUTION;
+//   pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION + pPositions[0]);
+//   #if SP_DEBUG
+//   Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
+//   Serial.println(pRealPosition);
+//   Serial.printf("(PS) -> updateRealPosition(): pulse: %i\n", mPulseCount);  
+//   #endif
+// }
 
 
 void PodSensor::updateMeisterNoteIndex()
