@@ -39,13 +39,15 @@ public:
   void fadeOutVolume();
   void fadeInVolume();
   void pGoToNote();
+  void pGoToLastNote();
 
   uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
   unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
   uint8_t tuneRange = 1; //both up and down
-  unsigned int meisterOrder[6] = {3,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
-  unsigned int accelPattern[6] = {500,800,1500,3000,4500}; //increasing acceleration of "seeking" notes, related to above
-  unsigned int maxSpeedPattern[6] = {1000,1500,3000,4500,7000}; //increasing max speed of "seeking" notes, related to above
+  unsigned int meisterOrder[5] = {3,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
+  unsigned int accelPattern[5] = {500,800,1500,3000,4500}; //increasing acceleration of "seeking" notes, related to above
+  unsigned int maxSpeedPattern[5] = {1000,1500,3000,4500,7000}; //increasing max speed of "seeking" notes, related to above
+  unsigned bool tuneFlags[5] = {false,false,false,false,false}; //turned ON when the first motion to that note has finished
   unsigned int pulseTimings[7] = {450,1050,1550,1950,2250,2450,2550}; //lookup table for main timming triggers. first is intro, rest is related to the notes, last to the ending.
   int lastIndex = 0;
   uint16_t pMeisterNoteIndex;
@@ -56,6 +58,7 @@ public:
   unsigned long pRealPosition = 0;
 
   bool pIsMeister = false; // meister flag
+  bool lastDrone = false; // flag for last fading out
 
 private:
   uint8_t mPulseDelay = 0;
