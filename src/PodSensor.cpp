@@ -315,6 +315,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
         {
           if (currentTuning < 6)
           {
+            //THE PROBLEMATIC ONE
             pGoToNote();
           }
           else
