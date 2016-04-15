@@ -44,7 +44,7 @@ public:
 
   uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
   unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
-  uint8_t tuneRange = 1; //both up and down
+  uint8_t tuneRange = 0; //both up and down
   unsigned int meisterOrder[5] = {3,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
   unsigned int accelPattern[5] = {500,2000,3500,5000,6000}; //increasing acceleration of "seeking" notes, related to above
   unsigned int maxSpeedPattern[5] = {1000,3000,5000,7000,8500}; //increasing max speed of "seeking" notes, related to above
