@@ -75,7 +75,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     motor->start();
   }
 
-  // check pulse to alternate currentTuning
+  //Introduction to Development Transition Check
 
   if (mPulseCount == pulseTimings[0])
   {
@@ -106,7 +106,94 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     }
   }
 
+    //Development part
 
+    if (mPulseCount >= pulseTimings[0] && mPulseCount <= pulseTimings[1])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 1)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 1;
+    }
+
+    if (mPulseCount >= pulseTimings[1] && mPulseCount <= pulseTimings[2])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 2)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 2;
+    }
+
+    if (mPulseCount >= pulseTimings[2] && mPulseCount <= pulseTimings[3])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 3)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 3;
+    }
+
+    if (mPulseCount >= pulseTimings[3] && mPulseCount <= pulseTimings[4])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 4)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 4;
+    }
+
+    if (mPulseCount >= pulseTimings[4] && mPulseCount <= pulseTimings[5])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 5)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 5;
+    }
+
+    if (mPulseCount >= pulseTimings[5] && mPulseCount <= pulseTimings[6])
+    {
+      #if SP_DEBUG
+      if (currentTuning < 6)
+      {
+        Serial.println();
+        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
+        Serial.println();
+      }
+      #endif
+      currentTuning = 6;
+    }
+
+    if (midiChannel != meisterOrder[currentTuning])
+    {
+      pIsMeister = false;
+    }
+    else
+    {
+      pIsMeister = true;
+    }
 
   // therefore increment afterwards
   mPulseCount++;
@@ -117,9 +204,8 @@ void PodSensor::pGoToNote()
   //Search for Note
   updateRealPosition();
   updateNoteToFollowIndex();
-  getConcreteParent()->getMotor()->moveToPosition(pPositions[pNoteToFollowIndex]+25600, accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
+  getConcreteParent()->getMotor()->moveToPosition(pRealPosition+pPositions[pNoteToFollowIndex], accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
 }
-
 
 void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 #if SP_DEBUG
@@ -127,7 +213,6 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
   Serial.println();
 #endif
   switch(pMessage) {
-
     case MotorMessages::ACCELERATION_DONE:
       // start buffering phase
       getConcreteParent()->getSensor()->startBuffering();
@@ -160,7 +245,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       case MotorMessages::TUNING_DONE:
         if (pIsMeister)
         {
-          
+          //Just chill, play the drone
         }
         else
         {
@@ -176,8 +261,8 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 void PodSensor::updateRealPosition()
 {
   long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
-  long div = mpos/25600;
-  pRealPosition = mpos -(div*25600);
+  long div = mpos/getConcreteParent()->getMotor()->FULL_REVOLUTION;
+  pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION - pPositions[0]);
   #if SP_DEBUG
   Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
   Serial.println(pRealPosition);
@@ -216,7 +301,7 @@ void PodSensor::updateNoteToFollowIndex()
   //For now, it is hardcoded to iterate to the notes: A1, A2, A3, A4, A5, A6, A7.
 
   bool safecheck = false;
-  for (int i = 0; i < BUFFER_SIZE; i++)
+  for (int i = random(BUFFER_SIZE); i < BUFFER_SIZE; i++)
   {
     if (pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange )
     {
