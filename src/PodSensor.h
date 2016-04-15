@@ -41,6 +41,7 @@ public:
   void pGoToNote();
   void pGoToLastNote();
   uint16_t getNextIndexToFollow();
+  void playNote(uint16_t pNote);
 
   uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
   unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
@@ -67,6 +68,7 @@ private:
   uint16_t bufferCounter = 0;
   unsigned int midiChannel;
   uint16_t mLastNote = 0;
+  bool mPlayNotesInSyncToMovement = false;
 };
 
 

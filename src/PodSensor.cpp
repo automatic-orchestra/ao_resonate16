@@ -80,7 +80,6 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 
   if (mPulseCount == pulseTimings[0])
   {
-
     //Update Current Tuning Tone and Meister Flag
     currentTuning = 0;
     if (midiChannel != meisterOrder[currentTuning])
@@ -126,122 +125,119 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     }
   }
   // play note from buffer
-  if(index != -1) {
-    uint16_t note = pNotes[index];
-    if(note != mLastNote) {
-      // finally play the new note
-      Serial.printf("(PS) -> onClockBeatChange(): Note %i\n",note);
-      Music.noteOn(note, 127);
-      mLastNote = note;
+  if(mPlayNotesInSyncToMovement) {
+    if(index != -1) {
+      uint16_t note = pNotes[index];
+      playNote(note);
+    } else {
+      #if SP_DEBUG
+      Serial.println("(PS) -> onClockBeatChange(): No matching index found - which shouldn't happen :(");
+      #endif
     }
-  } else {
-#if SP_DEBUG
-    Serial.println("(PS) -> onClockBeatChange(): No matching index found - which shouldn't happen :(");
-#endif
   }
   
   //Development part
   
-    if (mPulseCount == pulseTimings[0])
+  if (mPulseCount == pulseTimings[0])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
+    Serial.println();
+    #endif
+    currentTuning = 1;
+    if (pIsMeister && !tuneFlags[1])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
-      Serial.println();
-      #endif
-      currentTuning = 1;
-      if (pIsMeister && !tuneFlags[1])
-      {
-        tuneFlags[1] = true;
-        pGoToNote();
-      }
+      tuneFlags[1] = true;
+      pGoToNote();
     }
+  }
 
-    if (mPulseCount == pulseTimings[1])
+  if (mPulseCount == pulseTimings[1])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
+    Serial.println();
+    #endif
+    currentTuning = 2;
+    if (pIsMeister && !tuneFlags[2])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
-      Serial.println();
-      #endif
-      currentTuning = 2;
-      if (pIsMeister && !tuneFlags[2])
-      {
-        tuneFlags[2] = true;
-        pGoToNote();
-      }
+      tuneFlags[2] = true;
+      pGoToNote();
     }
+  }
 
-    if (mPulseCount == pulseTimings[2])
+  if (mPulseCount == pulseTimings[2])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
+    Serial.println();
+    #endif
+    currentTuning = 3;
+    if (pIsMeister && !tuneFlags[3])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
-      Serial.println();
-      #endif
-      currentTuning = 3;
-      if (pIsMeister && !tuneFlags[3])
-      {
-        tuneFlags[3] = true;
-        pGoToNote();
-      }
+      tuneFlags[3] = true;
+      pGoToNote();
     }
+  }
 
-    if (mPulseCount == pulseTimings[3])
+  if (mPulseCount == pulseTimings[3])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
+    Serial.println();
+    #endif
+    currentTuning = 4;
+    if (pIsMeister && !tuneFlags[4])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
-      Serial.println();
-      #endif
-      currentTuning = 4;
-      if (pIsMeister && !tuneFlags[4])
-      {
-        tuneFlags[4] = true;
-        pGoToNote();
-      }
+      tuneFlags[4] = true;
+      pGoToNote();
     }
+  }
 
-    if (mPulseCount == pulseTimings[4])
+  if (mPulseCount == pulseTimings[4])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
+    Serial.println();
+    #endif
+    currentTuning = 5;
+    if (pIsMeister && !tuneFlags[5])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
-      Serial.println();
-      #endif
-      currentTuning = 5;
-      if (pIsMeister && !tuneFlags[5])
-      {
-        tuneFlags[5] = true;
-        pGoToNote();
-      }
+      tuneFlags[5] = true;
+      pGoToNote();
     }
+  }
 
-    //Final Part
+  //Final Part
 
-    if (mPulseCount == pulseTimings[5])
+  if (mPulseCount == pulseTimings[5])
+  {
+    #if SP_DEBUG
+    Serial.println();
+    Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
+    Serial.println();
+    #endif
+    currentTuning = 6;
+    if (pIsMeister && !tuneFlags[6])
     {
-      #if SP_DEBUG
-      Serial.println();
-      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
-      Serial.println();
-      #endif
-      currentTuning = 6;
-      if (pIsMeister && !tuneFlags[6])
-      {
-        tuneFlags[6] = true;
-        pGoToNote();
-      }
+      tuneFlags[6] = true;
+      pGoToNote();
     }
+  }
 
-    if (midiChannel != meisterOrder[currentTuning])
-    {
-      pIsMeister = false;
-    }
-    else
-    {
-      pIsMeister = true;
-    }
+  if (midiChannel != meisterOrder[currentTuning])
+  {
+    pIsMeister = false;
+  }
+  else
+  {
+    pIsMeister = true;
+  }
 
   // therefore increment afterwards
   mPulseCount++;
@@ -260,7 +256,7 @@ void PodSensor::pGoToNote()
     getConcreteParent()->getMotor()->relativeToAbsolutePosition(pPositions[pNoteToFollowIndex]),
     accelPattern[currentTuning],
     maxSpeedPattern[currentTuning]
-  );
+  );  
 }
 
 void PodSensor::pGoToLastNote()
@@ -301,17 +297,16 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::DECELERATION_DONE:
-        if (pIsMeister)
-        {
+        if (pIsMeister) {
           // updateRealPosition();
           updateMeisterNoteIndex();
-        }
-        else
-        {
+        } else {
           #if SP_DEBUG
           Serial.println("(PS) -> onMotorMessage(): Waiting for pulse ");
           #endif
         }
+        // enable plyaback based on motor movement
+        mPlayNotesInSyncToMovement = true;
       break;
 
       case MotorMessages::TUNING_DONE:
@@ -343,18 +338,6 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
   }
 }
-
-// void PodSensor::updateRealPosition()
-// {
-//   long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
-//   long div = mpos/getConcreteParent()->getMotor()->FULL_REVOLUTION;
-//   pRealPosition = mpos -(div*getConcreteParent()->getMotor()->FULL_REVOLUTION + pPositions[0]);
-//   #if SP_DEBUG
-//   Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
-//   Serial.println(pRealPosition);
-//   Serial.printf("(PS) -> updateRealPosition(): pulse: %i\n", mPulseCount);  
-//   #endif
-// }
 
 
 void PodSensor::updateMeisterNoteIndex()
@@ -426,53 +409,6 @@ uint16_t PodSensor::getNextIndexToFollow() {
 }
 
 
-// void PodSensor::updateNoteToFollowIndex()
-// {
-//   //Change the following for the received Meister Note sent by the Meister
-//   //For now, it is hardcoded to iterate to the notes: A1, A2, A3, A4, A5, A6, A7.
-
-//   bool safecheck = false;
-//   for (int i = random(BUFFER_SIZE); i < BUFFER_SIZE; i++)
-//   {
-//     if (pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange )
-//     {
-//       if (i != lastIndex)
-//       {
-//         if (abs(pPositions[lastIndex]-pPositions[i]) > 500)
-//         {
-//           pNoteToFollowIndex = i;
-//           safecheck = true;
-//           lastIndex = pNoteToFollowIndex;
-//           break;
-//         }
-//       }
-//     }
-//   }
-
-//   if (!safecheck)
-//   {
-//     //Note found, choose a random index to assign the note.
-//     while (safecheck == false)
-//     {
-//         pNoteToFollowIndex = random(BUFFER_SIZE-1);
-//         if (pNoteToFollowIndex != lastIndex)
-//         {
-//           if (abs(pPositions[lastIndex]-pPositions[pNoteToFollowIndex]) > 500)
-//           {
-//             pNotes[pNoteToFollowIndex] = tuneNotes[currentTuning];
-//             safecheck = true;
-//             lastIndex = pNoteToFollowIndex;
-//           }
-//         }
-//       }
-//   }
-
-//   #if SP_DEBUG
-//   Serial.printf("(PS) -> updateNoteToFollowIndex(): pNoteToFollowIndex %i podNote %i",pNoteToFollowIndex,pNotes[pNoteToFollowIndex] );
-//   #endif
-// }
-
-
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
   #if 0
     Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i\n", pMessage, pValue);
@@ -494,9 +430,9 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case SensorMessages::SENSOR_READING:
-        pNotes[bufferCounter] = map(pValue,0,1023,36,95);
+        pNotes[bufferCounter] = map(pValue,0,1023,24,71);//map(pValue,0,1023,36,95);
         pPositions[bufferCounter] = getConcreteParent()->getMotor()->mMotor.currentPosition();
-        #if SP_DEBUG
+        #if 0
           Serial.print("(PS) -> onSensorMessage(): index: ");
           Serial.print(bufferCounter);
           Serial.print(" pNote: ");
@@ -504,8 +440,19 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
           Serial.print(" pPositions: ");
           Serial.println(pPositions[bufferCounter]);
         #endif
+        playNote(pNotes[bufferCounter]);
         bufferCounter++;
       break;
+  }
+}
+
+void PodSensor::playNote(uint16_t pNote) {
+  if(pNote != mLastNote) {
+    // finally play the new note
+    // Serial.printf("(PS) -> onClockBeatChange(): Note %i\n",note);
+    //TODO add correct velocity
+    Music.noteOn(pNote, 127);
+    mLastNote = pNote;
   }
 }
 
