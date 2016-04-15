@@ -19,7 +19,7 @@
 #include "SensorProxy.h"
 #include "SensorMessages.h"
 
-#define SP_DEBUG true
+#define SP_DEBUG false
 
 
 SensorProxy::SensorProxy(uint8_t pPin) : mPin(pPin) {
@@ -32,14 +32,6 @@ SensorProxy::~SensorProxy() {
 
 
 void SensorProxy::update() {
-  // uint16_t pinValue = analogRead(mPin);
-  // mNormalizer->push(pinValue);
-  // if(mNormalizer->hasNew()) {
-  //   //TODO write value into buffer
-  //   if (mValueCallback != NULL) {
-  //       (*mValueCallback)(mNormalizer->get());
-  //   }
-  // }
   if(mBuffering) {
     unsigned long t = micros();
     if(t - mLastBufferTime >= BUFFER_CAPTURE_TIME_OFFSET) {

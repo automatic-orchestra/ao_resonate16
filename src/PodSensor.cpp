@@ -477,8 +477,8 @@ uint16_t PodSensor::getNextIndexToFollow() {
 
 
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
-  #if SP_DEBUG
-    Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i", pMessage, pValue);
+  #if 0
+    Serial.printf("(PS) -> onSensorMessage(): message: %i - value: %i\n", pMessage, pValue);
   #endif
   switch(pMessage) {
     case SensorMessages::BUFFER_FULL:
