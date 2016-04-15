@@ -377,7 +377,7 @@ uint16_t PodSensor::getNextIndexToFollow() {
   for (int i = randomIndex; i < randomIndex + BUFFER_SIZE; i++) {
     // index wrapping to go over the whole buffer
     if(i >= BUFFER_SIZE) {
-      i %= BUFFER_SIZE;
+      i -= BUFFER_SIZE;
     }
     // check new possible note is within the tuning range
     if(pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange) {
