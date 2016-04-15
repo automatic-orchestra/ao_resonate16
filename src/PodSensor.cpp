@@ -111,9 +111,40 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     }
   }
 
+  // ---------------------------------------
+  //  play the note based on motor position
+  // ---------------------------------------
+  // calculate relative postion of values in buffer
+  unsigned long pos = getConcreteParent()->getMotor()->mMotor.currentPosition();
+  unsigned long firstBufferPos = pPositions[0];
+  unsigned long relativePos = firstBufferPos + ((pos - firstBufferPos) % MotorProxy::FULL_REVOLUTION);
+  // find matching index of position in buffer
+  int index = -1;
+  for(int i = 0; i < BUFFER_SIZE; i++) {
+    // following index
+    int j = (i + 1 == BUFFER_SIZE) ? 0 : i + 1;
+    // check buffer values to determine index
+    if(relativePos >= pPositions[i] && relativePos < pPositions[j]) {
+      index = 1;
+      break;
+    }
+  }
+  // play note from buffer
+  if(index != -1) {
+    uint16_t note = pNotes[index];
+    if(note != mLastNote) {
+      // finally play the new note
+      Music.noteOn(note, 127);
+      mLastNote = note;
+    }
+  } else {
+#if SP_DEBUG
+    Serial.println("(PS) -> onClockBeatChange(): No matching index found - which shouldn't happen :(");
+#endif
+  }
+  
 
-
-  // therefore increment afterwards
+  // keep track of total pulse count
   mPulseCount++;
 }
 
@@ -128,8 +159,7 @@ void PodSensor::pGoToNote()
 
 void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 #if SP_DEBUG
-  Serial.printf("(PS) -> onMotorMessage(): message: %i - value: %i", pMessage, pValue);
-  Serial.println();
+  Serial.printf("(PS) -> onMotorMessage(): message: %i - value: %i\n", pMessage, pValue);
 #endif
   switch(pMessage) {
 

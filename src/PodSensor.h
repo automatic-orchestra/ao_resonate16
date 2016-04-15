@@ -62,6 +62,7 @@ private:
   uint64_t mPulseCount = 0;
   uint16_t bufferCounter = 0;
   unsigned int midiChannel;
+  uint16_t mLastNote = 0;
 };
 
 
