@@ -245,7 +245,8 @@ void PodSensor::pGoToNote()
   #endif
   //Search for Note
   // updateRealPosition();
-  updateNoteToFollowIndex();
+  // updateNoteToFollowIndex();
+  pNoteToFollowIndex = getNextIndexToFollow();
   getConcreteParent()->getMotor()->moveToPosition(
     getConcreteParent()->getMotor()->relativeToAbsolutePosition(pPositions[pNoteToFollowIndex]),
     accelPattern[currentTuning],
@@ -260,7 +261,8 @@ void PodSensor::pGoToLastNote()
   #endif
   //Search for Note
   // updateRealPosition();
-  updateNoteToFollowIndex();
+  // updateNoteToFollowIndex();
+  pNoteToFollowIndex = getNextIndexToFollow();
   getConcreteParent()->getMotor()->moveToPosition(
     getConcreteParent()->getMotor()->relativeToAbsolutePosition(pPositions[pNoteToFollowIndex] + MotorProxy::FULL_REVOLUTION * 3),
     accelPattern[currentTuning],
@@ -385,51 +387,94 @@ void PodSensor::updateMeisterNoteIndex()
   #endif
 }
 
-void PodSensor::updateNoteToFollowIndex()
-{
-  //Change the following for the received Meister Note sent by the Meister
-  //For now, it is hardcoded to iterate to the notes: A1, A2, A3, A4, A5, A6, A7.
 
-  bool safecheck = false;
-  for (int i = random(BUFFER_SIZE); i < BUFFER_SIZE; i++)
-  {
-    if (pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange )
-    {
-      if (i != lastIndex)
-      {
-        if (abs(pPositions[lastIndex]-pPositions[i]) > 500)
-        {
-          pNoteToFollowIndex = i;
-          safecheck = true;
-          lastIndex = pNoteToFollowIndex;
+uint16_t PodSensor::getNextIndexToFollow() {
+  // create an array to store possible new positions
+  const uint8_t MAX_NEW_POSITIONS = 10;
+  uint16_t newPositions[MAX_NEW_POSITIONS] = {};
+  uint8_t newPositionCounter = 0;
+  // start with random index in buffer
+  int randomIndex = random(BUFFER_SIZE);
+  uint16_t minPositionDistance = 500;
+  // loop over all buffer entires and find matching notes
+  for (int i = randomIndex; i < randomIndex + BUFFER_SIZE; i++) {
+    // index wrapping to go over the whole buffer
+    if(i >= BUFFER_SIZE) {
+      i %= BUFFER_SIZE;
+    }
+    // check new possible note is within the tuning range
+    if(pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange) {
+      // exclude current index and check if possible new position has a nice distance
+      if (i != lastIndex && abs(pPositions[i] - pPositions[lastIndex]) > minPositionDistance) {
+        // capture index of possible new position
+        newPositions[newPositionCounter] = i;
+        newPositionCounter++;
+        // check if there are enough results already
+        if(newPositionCounter >= MAX_NEW_POSITIONS) {
           break;
         }
       }
     }
   }
-
-  if (!safecheck)
-  {
-    //Note found, choose a random index to assign the note.
-    while (safecheck == false)
-    {
-        pNoteToFollowIndex = random(BUFFER_SIZE-1);
-        if (pNoteToFollowIndex != lastIndex)
-        {
-          if (abs(pPositions[lastIndex]-pPositions[pNoteToFollowIndex]) > 500)
-          {
-            pNotes[pNoteToFollowIndex] = tuneNotes[currentTuning];
-            safecheck = true;
-            lastIndex = pNoteToFollowIndex;
-          }
-        }
-      }
-  }
-
-  #if SP_DEBUG
-  Serial.printf("(PS) -> updateNoteToFollowIndex(): pNoteToFollowIndex %i podNote %i",pNoteToFollowIndex,pNotes[pNoteToFollowIndex] );
-  #endif
+  // return new index for note and motor position
+  if(newPositionCounter == 0) {
+    // return the last index if no new index was found
+    #if SP_DEBUG
+    Serial.println("(PS) -> getNextIndexToFollow(): no new index was found. :(");
+    #endif
+    return lastIndex;
+  } else {
+    // pick a random result out of found indecies
+    return newPositions[random(MAX_NEW_POSITIONS)];  
+  } 
 }
+
+
+// void PodSensor::updateNoteToFollowIndex()
+// {
+//   //Change the following for the received Meister Note sent by the Meister
+//   //For now, it is hardcoded to iterate to the notes: A1, A2, A3, A4, A5, A6, A7.
+
+//   bool safecheck = false;
+//   for (int i = random(BUFFER_SIZE); i < BUFFER_SIZE; i++)
+//   {
+//     if (pNotes[i] >= tuneNotes[currentTuning]-tuneRange && pNotes[i] <= tuneNotes[currentTuning]+tuneRange )
+//     {
+//       if (i != lastIndex)
+//       {
+//         if (abs(pPositions[lastIndex]-pPositions[i]) > 500)
+//         {
+//           pNoteToFollowIndex = i;
+//           safecheck = true;
+//           lastIndex = pNoteToFollowIndex;
+//           break;
+//         }
+//       }
+//     }
+//   }
+
+//   if (!safecheck)
+//   {
+//     //Note found, choose a random index to assign the note.
+//     while (safecheck == false)
+//     {
+//         pNoteToFollowIndex = random(BUFFER_SIZE-1);
+//         if (pNoteToFollowIndex != lastIndex)
+//         {
+//           if (abs(pPositions[lastIndex]-pPositions[pNoteToFollowIndex]) > 500)
+//           {
+//             pNotes[pNoteToFollowIndex] = tuneNotes[currentTuning];
+//             safecheck = true;
+//             lastIndex = pNoteToFollowIndex;
+//           }
+//         }
+//       }
+//   }
+
+//   #if SP_DEBUG
+//   Serial.printf("(PS) -> updateNoteToFollowIndex(): pNoteToFollowIndex %i podNote %i",pNoteToFollowIndex,pNotes[pNoteToFollowIndex] );
+//   #endif
+// }
 
 
 void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {

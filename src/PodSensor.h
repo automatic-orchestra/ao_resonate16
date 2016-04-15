@@ -33,13 +33,14 @@ public:
   void onClockBeatChange(unsigned long beat);
   void onMotorMessage(uint8_t pMessage, uint16_t pValue);
   void onSensorMessage(uint8_t pMessage, uint16_t pValue);
-  void updateNoteToFollowIndex();
+  // void updateNoteToFollowIndex();
   void updateMeisterNoteIndex();
   // void updateRealPosition();
   void fadeOutVolume();
   void fadeInVolume();
   void pGoToNote();
   void pGoToLastNote();
+  uint16_t getNextIndexToFollow();
 
   uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
   unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
