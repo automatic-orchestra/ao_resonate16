@@ -63,14 +63,11 @@ SensorOrchestra* PodSensor::getConcreteParent() {
 
 
 void PodSensor::onClockBeatChange(unsigned long beat) {
-  // check initial pulse at zero...
-#if SP_DEBUG
+  #if SP_DEBUG
   if(!getConcreteParent()->getMotor()->isActive()) {
-    #if SP_DEBUG
     Serial.printf("(PS) -> onClockBeatChange(): pulse count is: %i\n", mPulseCount);  
-    #endif
   }
-#endif
+  #endif
   // start motor movement after delay has elapsed
   MotorProxy* motor = getConcreteParent()->getMotor();
   if(mPulseCount >= mPulseDelay && !motor->isActive()) {
