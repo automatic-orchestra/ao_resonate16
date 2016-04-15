@@ -35,6 +35,8 @@ SensorOrchestra::SensorOrchestra() : Orchestra() {
     Arrangement::getInstance().init(macAddresses, MAC_ADDRESS_COUNT);
     // set midi channel and klock meister based on mac address
     setupDeviceParameters(MacAddress::get());
+    // quick hack to make everyone a klockmeister
+    mKlockMeister = true;
 }
 
 
