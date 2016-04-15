@@ -145,84 +145,96 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
   
   //Development part
   
-    if (mPulseCount >= pulseTimings[0] && mPulseCount <= pulseTimings[1])
+    if (mPulseCount == pulseTimings[0])
     {
       #if SP_DEBUG
-      if (currentTuning < 1)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
+      Serial.println();
       #endif
       currentTuning = 1;
+      if (pIsMeister && !tuneFlags[1])
+      {
+        tuneFlags[1] = true;
+        pGoToNote();
+      }
     }
 
-    if (mPulseCount >= pulseTimings[1] && mPulseCount <= pulseTimings[2])
+    if (mPulseCount == pulseTimings[1])
     {
       #if SP_DEBUG
-      if (currentTuning < 2)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
+      Serial.println();
       #endif
       currentTuning = 2;
+      if (pIsMeister && !tuneFlags[2])
+      {
+        tuneFlags[2] = true;
+        pGoToNote();
+      }
     }
 
-    if (mPulseCount >= pulseTimings[2] && mPulseCount <= pulseTimings[3])
+    if (mPulseCount == pulseTimings[2])
     {
       #if SP_DEBUG
-      if (currentTuning < 3)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
+      Serial.println();
       #endif
       currentTuning = 3;
+      if (pIsMeister && !tuneFlags[3])
+      {
+        tuneFlags[3] = true;
+        pGoToNote();
+      }
     }
 
-    if (mPulseCount >= pulseTimings[3] && mPulseCount <= pulseTimings[4])
+    if (mPulseCount == pulseTimings[3])
     {
       #if SP_DEBUG
-      if (currentTuning < 4)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
+      Serial.println();
       #endif
       currentTuning = 4;
+      if (pIsMeister && !tuneFlags[4])
+      {
+        tuneFlags[4] = true;
+        pGoToNote();
+      }
     }
 
-    if (mPulseCount >= pulseTimings[4] && mPulseCount <= pulseTimings[5])
+    if (mPulseCount == pulseTimings[4])
     {
       #if SP_DEBUG
-      if (currentTuning < 5)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
+      Serial.println();
       #endif
       currentTuning = 5;
+      if (pIsMeister && !tuneFlags[5])
+      {
+        tuneFlags[5] = true;
+        pGoToNote();
+      }
     }
 
     //Final Part
 
-    if (mPulseCount >= pulseTimings[5])
+    if (mPulseCount == pulseTimings[5])
     {
       #if SP_DEBUG
-      if (currentTuning < 6)
-      {
-        Serial.println();
-        Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
-        Serial.println();
-      }
+      Serial.println();
+      Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
+      Serial.println();
       #endif
       currentTuning = 6;
+      if (pIsMeister && !tuneFlags[6])
+      {
+        tuneFlags[6] = true;
+        pGoToNote();
+      }
     }
 
     if (midiChannel != meisterOrder[currentTuning])
@@ -305,22 +317,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 
       case MotorMessages::TUNING_DONE:
 
-        if (pIsMeister)
-        {
-          //Just chill, play the drone
-          if (!tuneFlags[currentTuning])
-          {
-            if (currentTuning < 6)
-            {
-              pGoToNote();
-            }
-            else
-            {
-              pGoToLastNote();
-            }
-          }
-        }
-        else
+        if (!pIsMeister)
         {
           if (currentTuning < 6)
           {
