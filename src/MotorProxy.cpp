@@ -49,7 +49,7 @@ void MotorProxy::setZeroPosition() {
 void MotorProxy::update() {
   if(mActive) {
     /*
-    if (mMotor.currentPosition() >= 25600)
+    if (mMotor.currentPosition() >= FULL_REVOLUTION)
     {
       // update positioning
       uint16_t currentSpeed = mMotor.speed();
@@ -175,7 +175,7 @@ void MotorProxy::turnAtSpeed(uint16_t speed,uint8_t turns) {
   mMotor.setSpeed(speed);
   mIsTurning = true;
   mTurnStart = mMotor.currentPosition();
-  mTurnEnd = mTurnStart + (25600*turns);
+  mTurnEnd = mTurnStart + (FULL_REVOLUTION * turns);
   #if MP_DEBUG
   Serial.print("(MP) -> turnAtFullSpeed(): turns: ");
   Serial.print(turns);
