@@ -422,7 +422,9 @@ uint16_t PodSensor::getNextIndexToFollow() {
     return lastIndex;
   } else {
     // pick a random result out of found indecies
-    return newPositions[random(MAX_NEW_POSITIONS)];  
+    uint16_t newPos = newPositions[random(MAX_NEW_POSITIONS)];
+    Serial.printf("(PS) -> getNextIndexToFollow(): new index is %i:\n", newPos);
+    return newPos;
   } 
 }
 

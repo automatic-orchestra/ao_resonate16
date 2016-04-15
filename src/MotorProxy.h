@@ -59,6 +59,7 @@ private:
   unsigned long mTurnStart;
   unsigned long mTurnEnd;
   void (*mCallback)(uint8_t, uint16_t) = NULL;
+  int mWaitForAcceleration = 0;
 };
 
 

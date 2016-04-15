@@ -87,6 +87,7 @@ void MotorProxy::update() {
         mTime = t;
       } 
     }
+    
     // check turns in turnAtSpeed currentTuning
     if (mIsTurning) {
       if (mMotor.currentPosition() >= mTurnEnd)
@@ -99,16 +100,6 @@ void MotorProxy::update() {
 
       }
     }
-    // check if is moving to position (accelerated, tuning)
-    if (mIsMovingToPosition)
-    {
-      if(mMotor.distanceToGo() == 0)
-      {
-        mIsMovingToPosition = false;
-        Serial.println("(MP) -> update(): reached note, begin again");
-        sendCallback(MotorMessages::TUNING_DONE);
-      }
-    }
 
     // update motor
     if (!mIsMovingToPosition)
@@ -119,6 +110,18 @@ void MotorProxy::update() {
     {
       mMotor.run();  
     }
+
+    // check if is moving to position (accelerated, tuning)
+    if(mWaitForAcceleration > 0) { mWaitForAcceleration--; }
+    if(mWaitForAcceleration == 0) {
+      if (mIsMovingToPosition && mMotor.distanceToGo() == 0)
+      {
+        mIsMovingToPosition = false;
+        Serial.println("(MP) -> update(): reached note, begin again");
+        sendCallback(MotorMessages::TUNING_DONE);
+      }  
+    }
+    
   }
 }
 
@@ -126,7 +129,7 @@ void MotorProxy::moveToPosition(unsigned long pos, uint16_t acceleration, uint16
 {
   mMotor.setMaxSpeed(12000);
   mMotor.setAcceleration(acceleration);
-  mMotor.moveTo(pos);  
+  mMotor.moveTo(pos);
   mIsMovingToPosition = true;
 }
 
