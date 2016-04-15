@@ -25,7 +25,6 @@
 #define SP_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
 
-
 PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   // retrieve MIDI channel
   midiChannel = getParent()->getChannel();
@@ -340,6 +339,10 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
           }
         }
         tuneFlags[currentTuning] = true;
+        if (tuneFlags[6])
+        {
+         getConcreteParent()->getMotor()->mMotor.stop();
+        }
 
       break;
   }
