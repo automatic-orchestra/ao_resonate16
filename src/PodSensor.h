@@ -33,10 +33,14 @@ public:
   void onClockBeatChange(unsigned long beat);
   void onMotorMessage(uint8_t pMessage, uint16_t pValue);
   void onSensorMessage(uint8_t pMessage, uint16_t pValue);
+  void updateMeisterNote();
+  void updateRealPosition();
 
+  uint16_t pMeisterNoteIndex;
   static const uint16_t BUFFER_SIZE = 1600; // see NOTES.md for details
   uint16_t pNotes[BUFFER_SIZE] = {};
   unsigned long pPositions[BUFFER_SIZE] = {};
+  unsigned long pRealPosition = 0;
 
   bool pIsMeister = true;
 

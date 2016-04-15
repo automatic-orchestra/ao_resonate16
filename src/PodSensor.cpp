@@ -73,6 +73,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 #if SP_DEBUG
   Serial.printf("(PS) -> onMotorMessage(): message: %i - value: %i", pMessage, pValue);
+  Serial.println();
 #endif
   switch(pMessage) {
 
@@ -84,10 +85,50 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       case MotorMessages::TURNS_DONE:
         if (pIsMeister)
         {
-          //getConcreteParent()->getMotor()->decelerateToPosition(50, 0.9);
+          Serial.print("Decelerating Meister");
+          updateMeisterNote();
+          getConcreteParent()->getMotor()->decelerateToSpeed(50, 0.9);
+        }
+      break;
+
+      case MotorMessages::DECELERATION_DONE:
+        if (pIsMeister)
+        {
+          updateRealPosition();
+          updateMeisterNote();
         }
       break;
   }
+}
+
+void PodSensor::updateRealPosition()
+{
+  long mpos = getConcreteParent()->getMotor()->mMotor.currentPosition();
+  long div = mpos/25600;
+  pRealPosition = mpos -(div*25600);
+  #if SP_DEBUG
+  Serial.print("(PS) -> updateRealPosition(): pRealPosition ");
+  Serial.println(pRealPosition);
+  #endif
+}
+
+
+void PodSensor::updateMeisterNote()
+{
+  //Check which note is closest to current position, and assign it as the MeisterNote
+  uint16_t range = 30;
+  for (int i = 0; i < BUFFER_SIZE; i++)
+  {
+    if (pPositions[i] > pRealPosition-range && pPositions[i] < pRealPosition+range)
+    {
+        pMeisterNoteIndex = i;
+        break;
+    }
+  }
+  #if SP_DEBUG
+  Serial.print("(PS) -> updateMeisterNote(): meisterNodeIndex ");
+  Serial.println(pMeisterNoteIndex);
+  #endif
 }
 
 
@@ -126,6 +167,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
   }
 }
+
 
 
 

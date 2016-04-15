@@ -80,7 +80,7 @@ void SensorProxy::captureBufferValue() {
     sendMessage(SensorMessages::BUFFER_FULL);
     mBuffering = false;
   } else {
-    uint16_t pinValue = analogRead(mPin);
+    uint16_t pinValue = random(1023); //analogRead(mPin);
     mBuffer[mBufferIndex] = pinValue;
     sendMessage(SensorMessages::SENSOR_READING,mBuffer[mBufferIndex]);
     #if SP_DEBUG

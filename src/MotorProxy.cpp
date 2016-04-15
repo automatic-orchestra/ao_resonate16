@@ -48,6 +48,7 @@ void MotorProxy::setZeroPosition() {
 
 void MotorProxy::update() {
   if(mActive) {
+    /*
     if (mMotor.currentPosition() >= 25600)
     {
       // update positioning
@@ -55,6 +56,7 @@ void MotorProxy::update() {
       mMotor.setCurrentPosition(0);
       mMotor.setSpeed(currentSpeed);
     }
+    */
 
     // check if acceleration is done
     if(mIsAccelerating && mMotor.speed() == mMotor.maxSpeed()) {
