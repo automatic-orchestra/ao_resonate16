@@ -103,35 +103,29 @@ void MotorProxy::update() {
 
     // update motor
     if (mIsMovingToPosition) {
-      mMotor.run();  
+      mMotor.run();
     } else {
       mMotor.runSpeed();
     }
 
     // check if is moving to position (accelerated, tuning)
-    if(mWaitForAcceleration > 0) { mWaitForAcceleration--; }
-    if(mWaitForAcceleration == 0) {
-      if (mIsMovingToPosition && mMotor.distanceToGo() == 0) {
-        mIsMovingToPosition = false;
-        Serial.println("(MP) -> update(): reached note, begin again");
-        sendCallback(MotorMessages::TUNING_DONE);
-      }  
-    }
-    
+    if (mIsMovingToPosition && mMotor.distanceToGo() == 0) {
+      mIsMovingToPosition = false;
+      Serial.println("(MP) -> update(): reached note, begin again");
+      sendCallback(MotorMessages::TUNING_DONE);
+    }  
   }
 }
 
 void MotorProxy::moveToPosition(unsigned long pos, uint16_t acceleration, uint16_t maxspeed)
 {
-  Serial.printf("(MP) -> moveToPosition(): current position: %i\n", pos, mMotor.currentPosition());
+  Serial.printf("(MP) -> moveToPosition(): current position: %i\n", mMotor.currentPosition());
   mMotor.setMaxSpeed(12000);
   mMotor.setAcceleration(acceleration);
   mMotor.moveTo(pos);
-  mWaitForAcceleration = 100000;
   mIsMovingToPosition = true;
-  Serial.printf("(MP) -> moveToPosition(): pos: %i delay: %i\n", pos, mWaitForAcceleration);
-  Serial.printf("(MP) -> moveToPosition(): current position: %i\n", pos, mMotor.currentPosition());
-  Serial.printf("(MP) -> moveToPosition(): distance to go: %i\n", pos, mMotor.distanceToGo());
+  Serial.printf("(MP) -> moveToPosition(): new pos: %i\n", pos);
+  Serial.printf("(MP) -> moveToPosition(): distance to go: %i\n", mMotor.distanceToGo());
 }
 
 void MotorProxy::start() {
