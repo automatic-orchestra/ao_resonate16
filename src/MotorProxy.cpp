@@ -192,7 +192,7 @@ bool MotorProxy::isActive() {
 
 
 long MotorProxy::relativeToAbsolutePosition(long pRelativePos) {
-  long currentPosition = 2000; //mMotor.currentPosition();
+  long currentPosition = mMotor.currentPosition();
   long relativeMotorPosition = currentPosition % FULL_REVOLUTION;
   int totalTurns = (currentPosition - relativeMotorPosition) / FULL_REVOLUTION;
 
