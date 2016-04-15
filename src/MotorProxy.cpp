@@ -48,16 +48,6 @@ void MotorProxy::setZeroPosition() {
 
 void MotorProxy::update() {
   if(mActive) {
-    /*
-    if (mMotor.currentPosition() >= FULL_REVOLUTION)
-    {
-      // update positioning
-      uint16_t currentSpeed = mMotor.speed();
-      mMotor.setCurrentPosition(0);
-      mMotor.setSpeed(currentSpeed);
-    }
-    */
-
     // check if acceleration is done
     if(mIsAccelerating && mMotor.speed() == mMotor.maxSpeed()) {
       mIsAccelerating = false;
@@ -198,6 +188,22 @@ void MotorProxy::decelerateToSpeed(uint16_t pEndSpeed, float pRate) {
 
 bool MotorProxy::isActive() {
   return mActive;
+}
+
+
+long MotorProxy::relativeToAbsolutePosition(long pRelativePos) {
+  long currentPosition = 2000; //mMotor.currentPosition();
+  long relativeMotorPosition = currentPosition % FULL_REVOLUTION;
+  int totalTurns = (currentPosition - relativeMotorPosition) / FULL_REVOLUTION;
+
+  long newPositon = 0;
+  if(pRelativePos > relativeMotorPosition) {
+    newPositon = totalTurns * FULL_REVOLUTION + pRelativePos;
+  } else {
+    newPositon = (totalTurns + 1) * FULL_REVOLUTION + pRelativePos;
+  }
+
+  return newPositon;
 }
 
 
