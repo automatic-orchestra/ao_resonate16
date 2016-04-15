@@ -125,7 +125,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     int j = (i + 1 == BUFFER_SIZE) ? 0 : i + 1;
     // check buffer values to determine index
     if(relativePos >= pPositions[i] && relativePos < pPositions[j]) {
-      index = 1;
+      index = i;
       break;
     }
   }
@@ -134,6 +134,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
     uint16_t note = pNotes[index];
     if(note != mLastNote) {
       // finally play the new note
+      Serial.printf("(PS) -> onClockBeatChange(): Note %i\n",note);
       Music.noteOn(note, 127);
       mLastNote = note;
     }
@@ -210,7 +211,9 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
       currentTuning = 5;
     }
 
-    if (mPulseCount >= pulseTimings[5] && mPulseCount <= pulseTimings[6])
+    //Final Part
+
+    if (mPulseCount >= pulseTimings[5])
     {
       #if SP_DEBUG
       if (currentTuning < 6)
@@ -238,10 +241,25 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 
 void PodSensor::pGoToNote()
 {
+  #if SP_DEBUG
+  Serial.println("(PS) -> onMotorMessage(): Go to Current Note");
+  #endif
   //Search for Note
   updateRealPosition();
   updateNoteToFollowIndex();
   getConcreteParent()->getMotor()->moveToPosition(pRealPosition+pPositions[pNoteToFollowIndex], accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
+}
+
+void PodSensor::pGoToLastNote()
+{
+  #if SP_DEBUG
+  Serial.println("(PS) -> onMotorMessage(): Go to the Last Note");
+  #endif
+  //Search for Note
+  updateRealPosition();
+  updateNoteToFollowIndex();
+  getConcreteParent()->getMotor()->moveToPosition(pRealPosition+pPositions[pNoteToFollowIndex]+getConcreteParent()->getMotor()->FULL_REVOLUTION*3, accelPattern[currentTuning],maxSpeedPattern[currentTuning]);
+  lastDrone = true;
 }
 
 void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
@@ -279,17 +297,42 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::TUNING_DONE:
+
         if (pIsMeister)
         {
           //Just chill, play the drone
+          if (!tuneFlags[currentTuning])
+          {
+            if (currentTuning < 6)
+            {
+              pGoToNote();
+            }
+            else
+            {
+              pGoToLastNote();
+            }
+          }
         }
         else
         {
-          #if SP_DEBUG
-          Serial.println("(PS) -> onMotorMessage(): Go to Current Note");
-          #endif
-          pGoToNote();
+          if (currentTuning < 6)
+          {
+            pGoToNote();
+          }
+          else
+          {
+            if (tuneFlags[6])
+            {
+              fadeOutVolume();
+            }
+            else
+            {
+              pGoToLastNote();
+            }
+          }
         }
+        tuneFlags[currentTuning] = true;
+
       break;
   }
 }
@@ -416,10 +459,14 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
 
 void PodSensor::fadeOutVolume()
 {
-
+  #if SP_DEBUG
+  Serial.println("(PS) -> PodSensor(): Fading Out");
+  #endif
 }
 
 void PodSensor::fadeInVolume()
 {
-
+  #if SP_DEBUG
+  Serial.println("(PS) -> PodSensor(): Fading In");
+  #endif
 }
