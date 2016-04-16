@@ -266,7 +266,7 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 
 
 void PodSensor::updateState() {
-  if(mStateIndex > STATE_COUNT) {
+  if(mStateIndex >= STATE_COUNT) {
     return;
   }
 
@@ -527,7 +527,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case SensorMessages::SENSOR_READING:
-        mNotesBuffer[bufferCounter] = map(pValue, MIN_SENSOR, MAX_SENSOR, MIN_NOTE, MAX_NOTE);
+        mNotesBuffer[bufferCounter] = constrain(map(pValue, MIN_SENSOR, MAX_SENSOR, MIN_NOTE, MAX_NOTE), MIN_NOTE, MAX_NOTE);
         mPositionsBuffer[bufferCounter] = getConcreteParent()->getMotor()->mMotor.currentPosition();
         #if 0
           Serial.print("(PS) -> onSensorMessage(): index: ");
