@@ -33,17 +33,10 @@
 PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   // retrieve MIDI channel
   int midiChannel = getParent()->getChannel();
+
   // calculate delay in pulses
   mPulseDelay = midiChannel * CHANNEL_DELAY_INCREMENT;
-  // check if is the first Meister (lookup table,)
-  // if (midiChannel == meisterOrder[0])
-  // {
-  //   mIsMeister = true;
-  // }
-  // else
-  // {
-  //   mIsMeister = false;
-  // }
+
   // apply jakob's magic crescendo preset
   uint8_t presetArray[] = {
     23, 0, 0, 0, 50, 1, 127, 0, 121, 3, 0, 64, 64, 127, 9, 40, 0, 2, 0, 0, 0, 64, 63, 127, 4, 0, 0, 0, 0, 0, 0, 64, 61, 127, 4, 12, 0, 1, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 127, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 127, 127, 127, 127, 0, 0, 0, 0, 0, 1, 127, 127, 0, 127
@@ -55,13 +48,14 @@ PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   #endif
 
   // initialize states
-  mStates[0] = new PodState("Introduction",    0, 0,    3200,   0,        450); // first state is not managed via AccelStepper acceleration
-  mStates[1] = new PodState("1st Development", 3, 500,  1000,  MIN_NOTE, 1050);
-  mStates[2] = new PodState("2st Development", 4, 2000, 3000,  45,       1550);
-  mStates[3] = new PodState("3st Development", 2, 3500, 5000,  57,       1950);
-  mStates[4] = new PodState("4th Development", 5, 5000, 7000,  69,       2250);
-  mStates[5] = new PodState("5th Development", 1, 6000, 8500,  81,       2450);
-  mStates[6] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 2550);
+  mStates[0] = new PodState("Introduction",    0, 0,    3200,   0,         0, 450); // first state is not managed via AccelStepper acceleration
+  mStates[1] = new PodState("1st Development", 3, 500,  1000,  MIN_NOTE,  50, 1050);
+  mStates[2] = new PodState("2st Development", 4, 2000, 3000,  45,        40, 1550);
+  mStates[3] = new PodState("3st Development", 2, 3500, 5000,  57,        30, 1950);
+  mStates[4] = new PodState("4th Development", 5, 5000, 7000,  69,        20, 2250);
+  mStates[5] = new PodState("5th Development", 1, 6000, 8500,  81,        10, 2450);
+  mStates[6] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 100, 2550);
+  // mStates[1] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 100, 700);
 }
 
 
@@ -84,53 +78,35 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
   }
   #endif
 
+  if(mNoteVelocity == 0) {
+    getConcreteParent()->getMotor()->mMotor.stop();
+    Serial.println("APPLAUSE!!!!");
+  }
+
   // update state - first thing to do before anything else
   updateState();
 
-  // handle delay
-  if(mPulseDelay > 0) {
-    mPulseDelay--;
-    if(mPulseDelay != 0) {
-      return;
-    }  
-  }
-
   // start initial motor movement
   MotorProxy* motor = getConcreteParent()->getMotor();
-  if(!motor->isActive()) {
+  if(mPulseDelay >= mPulseCount && !motor->isActive()) {
     // start acceleration phase
     motor->accelerateToSpeed(3200, 50, 1.25);
     motor->start();
   }
 
-  //Introduction to Development Transition Check
-
-  // if (mPulseCount == pulseTimings[0])
-  // {
-  //   //Update Current Tuning Tone and Meister Flag
-  //   // currentTuning = 0;
-  //   // if (midiChannel != meisterOrder[currentTuning])
-  //   // {
-  //   //   mIsMeister = false;
-  //   // }
-  //   // else
-  //   // {
-  //   //   mIsMeister = true;
-  //   // }
-
-  //   if (!mIsMeister)
-  //   {
-  //     #if SP_DEBUG
-  //       Serial.printf("(PS) -> onClockBeatChange(): currentTuning: %i ", currentTuning);
-  //       Serial.println();
-  //     #endif
-  //       goToNote();
-  //   }
-  //   else
-  //   {
-  //     //Hold the note
-  //   }
-  // }
+  //
+  if(mLastDrone && mNoteDelay > -1) {
+    if(mNoteDelay == 0) {
+      mNoteVelocity--;
+      playNote(mCurrentState->getTuningNote());
+    }
+    mNoteDelay--;
+  } else if(!mMeisterStates.currentlyActive && mNoteDelay > -1) {
+    if(mNoteDelay == 0) {
+      goToNote();
+    }
+    mNoteDelay--;
+  }
 
   // ---------------------------------------
   //  play the note based on motor position
@@ -161,112 +137,6 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
       #endif
     }
   }
-
-
-
-  
-  // //Development part
-  
-  // if (mPulseCount == pulseTimings[0])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 1");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 1;
-  //   if (mIsMeister && !tuneFlags[1])
-  //   {
-  //     tuneFlags[1] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // if (mPulseCount == pulseTimings[1])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 2");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 2;
-  //   if (mIsMeister && !tuneFlags[2])
-  //   {
-  //     tuneFlags[2] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // if (mPulseCount == pulseTimings[2])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 3");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 3;
-  //   if (mIsMeister && !tuneFlags[3])
-  //   {
-  //     tuneFlags[3] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // if (mPulseCount == pulseTimings[3])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 4");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 4;
-  //   if (mIsMeister && !tuneFlags[4])
-  //   {
-  //     tuneFlags[4] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // if (mPulseCount == pulseTimings[4])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 5");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 5;
-  //   if (mIsMeister && !tuneFlags[5])
-  //   {
-  //     tuneFlags[5] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // //Final Part
-
-  // if (mPulseCount == pulseTimings[5])
-  // {
-  //   #if SP_DEBUG
-  //   Serial.println();
-  //   Serial.println("(PS) -> onClockBeatChange(): change Tuning to 6");
-  //   Serial.println();
-  //   #endif
-  //   currentTuning = 6;
-  //   if (mIsMeister && !tuneFlags[6])
-  //   {
-  //     tuneFlags[6] = true;
-  //     goToNote();
-  //   }
-  // }
-
-  // if (midiChannel != meisterOrder[currentTuning])
-  // {
-  //   mIsMeister = false;
-  // }
-  // else
-  // {
-  //   mIsMeister = true;
-  // }
 
   // increment pulse count
   mPulseCount++;
@@ -308,6 +178,11 @@ void PodSensor::updateState() {
   if(newState) {
     // update meister states
     setMeisterStates();
+
+    //
+    if(mMeisterStates.wasActive && !mMeisterStates.currentlyActive) {
+      goToNote();
+    }
 
     #if SP_DEBUG
     Serial.print("\n(PS) -> updateState(): current state is: ");
@@ -389,38 +264,10 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 
       case MotorMessages::TUNING_DONE:
         if(mLastDrone) {
-          mPulseDelay = 20;
+          mNoteDelay = mCurrentState->getNoteDelay();
         } else {
           onTuningDone();
         }
-        
-        // if (!mMeisterStates.currentlyActive)
-        // {
-        //   if (currentTuning < 6)
-        //   {
-        //     //THE PROBLEMATIC ONE
-        //     goToNote();
-        //   }
-        //   else
-        //   {
-        //     if (tuneFlags[6])
-        //     {
-        //       fadeOutVolume();
-        //     }
-        //     else
-        //     {
-        //       // go to last note with three additional turns
-        //       goToNote(3);
-        //       // set last drone flag
-        //       mLastDrone = true;
-        //     }
-        //   }
-        // }
-        // tuneFlags[currentTuning] = true;
-        // if (tuneFlags[6])
-        // {
-        //  getConcreteParent()->getMotor()->mMotor.stop();
-        // }
 
       break;
   }
@@ -429,6 +276,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 
 void PodSensor::onTuningDone() {
   if(isLastState()) {
+    Serial.println("LAST DRONE");
     goToNote(3);
     mLastDrone = true;
   } else {
@@ -438,8 +286,7 @@ void PodSensor::onTuningDone() {
         mMeisterStates.isAtNote = true;
       }
     } else {
-      //TODO add delay
-      goToNote();
+      mNoteDelay = mCurrentState->getNoteDelay();
     }
   }
 }
@@ -448,31 +295,6 @@ void PodSensor::onTuningDone() {
 bool PodSensor::isLastState() {
   return mStateIndex == STATE_COUNT - 1;
 }
-
-
-// void PodSensor::updateMeisterNoteIndex()
-// {
-  // //Faking to be the current Note for Tunning
-  // bool safecheck = false;
-  // for (int i = 0; i < BUFFER_SIZE; i++)
-  // {
-  //   if (mNotesBuffer[i] >= tuneNotes[0]-mTuneRange && mNotesBuffer[i] <= tuneNotes[0]+mTuneRange )
-  //   {
-  //     pMeisterNoteIndex = i;
-  //     safecheck = true;
-  //   }
-  // }
-  // if (!safecheck)
-  // {
-  //   //Note found, choose a random index to assign the note.
-  //   pMeisterNoteIndex = random(BUFFER_SIZE-1);
-  //   mNotesBuffer[pMeisterNoteIndex] = tuneNotes[0];
-  // }
-
-  // #if SP_DEBUG
-  // Serial.printf("(PS) -> updateMeisterNoteIndex(): meisterNoteIndex %i meisterNote %i",pMeisterNoteIndex,mNotesBuffer[pMeisterNoteIndex]);
-  // #endif
-// }
 
 
 uint16_t PodSensor::getNextIndexToFollow() {
@@ -560,8 +382,8 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
 void PodSensor::playNote(uint16_t pNote) {
   if(pNote != mLastNote) {
     // finally play the new note
-    Serial.printf("(PS) -> playNote(): Note %i\n", pNote);
-    Music.noteOn(pNote, 127);
+    Serial.printf("(PS) -> playNote(): Note %i - Velocity: %i\n", pNote, mNoteVelocity);
+    Music.noteOn(pNote, mNoteVelocity);
     mLastNote = pNote;
   }
 }

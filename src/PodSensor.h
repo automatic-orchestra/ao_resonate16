@@ -39,25 +39,7 @@ public:
   
   void onClockBeatChange(unsigned long beat);
   void onMotorMessage(uint8_t pMessage, uint16_t pValue);
-  void onSensorMessage(uint8_t pMessage, uint16_t pValue);  
-
-  // void updateMeisterNoteIndex();
-  // uint8_t currentTuning = -1; //current note being tuned. -1 = intro. 0, 1, 2, 3, 4 refer to the bellow array
-  // unsigned int tuneNotes[6] = {45, 57, 69, 81, 93}; //hard coded for now
-  
-  // unsigned int meisterOrder[5] = {3,4,2,5,1}; //hard coding the iteration of Meisters, relate to above
-  // unsigned int accelPattern[5] = {500,2000,3500,5000,6000}; //increasing acceleration of "seeking" notes, related to above
-  // unsigned int maxSpeedPattern[5] = {1000,3000,5000,7000,8500}; //increasing max speed of "seeking" notes, related to above
-  // bool tuneFlags[5] = {false,false,false,false,false}; //turned ON when the first motion to that note has finished
-  // unsigned int pulseTimings[7] = {450,1050,1550,1950,2250,2450,2550}; //lookup table for main timming triggers. first is intro, rest is related to the notes, last to the ending.
-  
-  // uint16_t pMeisterNoteIndex;
-  // uint16_t mNoteToFollowIndex;
-  
-  // unsigned long pRealPosition = 0;
-
-  // bool mIsMeister = false; // meister flag
-  
+  void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 
 private:
   SensorOrchestra* getConcreteParent();
@@ -80,11 +62,9 @@ private:
   uint16_t mLastNote = 0;
   bool mPlayNotesInSyncToMovement = false;
 
-
-
   // new state handling - to be tested
   void updateState();
-  static const uint8_t STATE_COUNT = 7;
+  static const uint8_t STATE_COUNT = 7; //2
   PodState* mStates[STATE_COUNT];
   PodState* mCurrentState = nullptr;
   uint8_t mStateIndex = 0;
@@ -100,6 +80,10 @@ private:
   Meister mMeisterStates = {false, false, false};
 
   bool mLastDrone = false; // flag for last fading out
+
+  int8_t mNoteDelay = -1;
+
+  uint8_t mNoteVelocity = 127;
 
 };
 

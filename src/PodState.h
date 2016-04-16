@@ -31,6 +31,7 @@ public:
     uint16_t pAcceleration,
     uint16_t pMaxSpeed,
     uint8_t pTuningNote,
+    uint8_t pNoteDelay,
     uint16_t pDurationInPulses
   );
   ~PodState();
@@ -39,6 +40,7 @@ public:
   uint16_t getAcceleration();
   uint16_t getMaxSpeed();
   uint8_t getTuningNote();
+  uint8_t getNoteDelay();
   uint16_t getDurationInPulses();
 private:
   String mName;
@@ -46,6 +48,7 @@ private:
   uint16_t mAcceleration;
   uint16_t mMaxSpeed;
   uint8_t mTuningNote;
+  uint8_t mNoteDelay;
   uint16_t mDurationInPulses;
 };
 

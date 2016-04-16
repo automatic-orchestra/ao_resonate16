@@ -19,12 +19,21 @@
 #include "PodState.h"
 
 
-PodState::PodState(String pName, uint8_t pMeisterID, uint16_t pAcceleration, uint16_t pMaxSpeed, uint8_t pTuningNote, uint16_t pDurationInPulses) {
+PodState::PodState(
+  String pName, 
+  uint8_t pMeisterID, 
+  uint16_t pAcceleration, 
+  uint16_t pMaxSpeed, 
+  uint8_t pTuningNote, 
+  uint8_t pNoteDelay, 
+  uint16_t pDurationInPulses
+) {
   mName = pName;
   mMeisterID = pMeisterID;
   mAcceleration = pAcceleration;
   mMaxSpeed = pMaxSpeed;
   mTuningNote = pTuningNote;
+  mNoteDelay = pNoteDelay;
   mDurationInPulses = pDurationInPulses;
 }
 
@@ -55,6 +64,11 @@ uint16_t PodState::getMaxSpeed() {
 
 uint8_t PodState::getTuningNote() {
   return mTuningNote;
+}
+
+
+uint8_t PodState::getNoteDelay() {
+  return mNoteDelay;
 }
 
 

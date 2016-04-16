@@ -73,6 +73,7 @@ void SensorProxy::captureBufferValue() {
     mBuffering = false;
   } else {
     int pinValue = analogRead(mPin);
+    // int pinValue = random(0, 1023);
     mBuffer[mBufferIndex] = pinValue;
     int smoothValue = digitalSmooth(pinValue, mBufferSmoothing);
     sendMessage(SensorMessages::SENSOR_READING,smoothValue);
