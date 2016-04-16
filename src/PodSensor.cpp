@@ -48,14 +48,14 @@ PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   #endif
 
   // initialize states
-  mStates[0] = new PodState("Introduction",    0, 0,    3200,   0,         0, 450); // first state is not managed via AccelStepper acceleration
+  mStates[0] = new PodState("Introduction",    -1, 0,    3200,   0,         0, 450); // first state is not managed via AccelStepper acceleration
   mStates[1] = new PodState("1st Development", 3, 500,  1000,  MIN_NOTE,  50, 1050);
   mStates[2] = new PodState("2st Development", 4, 2000, 3000,  45,        40, 1550);
   mStates[3] = new PodState("3st Development", 2, 3500, 5000,  57,        30, 1950);
   mStates[4] = new PodState("4th Development", 5, 5000, 7000,  69,        20, 2250);
   mStates[5] = new PodState("5th Development", 1, 6000, 8500,  81,        10, 2450);
-  mStates[6] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 100, 2550);
-  // mStates[1] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 100, 700);
+  mStates[6] = new PodState("Finale",          -1, 0,    10000, MAX_NOTE, 100, 2550);
+  // mStates[1] = new PodState("Finale",          -1, 0,    10000, MAX_NOTE, 100, 700);
 }
 
 
@@ -183,6 +183,16 @@ void PodSensor::updateState() {
     if(mMeisterStates.wasActive && !mMeisterStates.currentlyActive) {
       goToNote();
     }
+
+    if(mMeisterStates.wasActive && isLastState()) {
+      goToNote(3); 
+      mLastDrone = true;
+    }
+    // if(isLastState()) {
+    //   Serial.println("DO IT!");
+    //   goToNote(); 
+    //   mLastDrone = true;
+    // }
 
     #if SP_DEBUG
     Serial.print("\n(PS) -> updateState(): current state is: ");

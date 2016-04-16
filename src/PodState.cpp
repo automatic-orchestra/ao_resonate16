@@ -21,7 +21,7 @@
 
 PodState::PodState(
   String pName, 
-  uint8_t pMeisterID, 
+  int8_t pMeisterID, 
   uint16_t pAcceleration, 
   uint16_t pMaxSpeed, 
   uint8_t pTuningNote, 
@@ -47,7 +47,7 @@ String PodState::getName() {
 }
 
 
-uint8_t PodState::getMeisterID() {
+int8_t PodState::getMeisterID() {
   return mMeisterID;
 }
 

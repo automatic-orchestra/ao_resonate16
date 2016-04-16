@@ -64,7 +64,7 @@ private:
 
   // new state handling - to be tested
   void updateState();
-  static const uint8_t STATE_COUNT = 7; //2
+  static const uint8_t STATE_COUNT = 7; // set to 7!!!!!!
   PodState* mStates[STATE_COUNT];
   PodState* mCurrentState = nullptr;
   uint8_t mStateIndex = 0;
