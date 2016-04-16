@@ -279,13 +279,13 @@ void PodSensor::updateState() {
     // set initial state index
     mStateIndex = 0;
     // set inital state
-    mCurrentState = *(mStates + mStateIndex);
+    mCurrentState = *(mStates);
     // set debug flag
     newState = true;
   }
 
   // check if current state is done nd needs to change
-  if(mCurrentState->getDurationInPulses() >= mPulseCount) {
+  if(mPulseCount > mCurrentState->getDurationInPulses()) {
     // increment state index
     mStateIndex++;
 
