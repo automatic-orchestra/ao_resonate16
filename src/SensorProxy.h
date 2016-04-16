@@ -18,6 +18,7 @@
 
 #ifndef SENSORPROXY_H
 #define SENSORPROXY_H
+#define FILTERSAMPLES   7   //Has to be an ODD number
 
 #include <Arduino.h>
 #include "Normalizer.h"
@@ -39,9 +40,11 @@ private:
   void (*mCallback)(uint8_t, uint16_t) = NULL;
   void sendMessage(uint8_t pMessage, uint16_t pValue = 0);
   void captureBufferValue();
+  int digitalSmooth(int rawIn, int *sensSmoothArray);
 
   uint8_t mPin;
-  uint16_t mBuffer[BUFFER_SIZE] = {};
+  int mBuffer[BUFFER_SIZE] = {};
+  int mBufferSmoothing [FILTERSAMPLES];
 
   bool mBuffering = false;
   unsigned long mLastBufferTime = 0;

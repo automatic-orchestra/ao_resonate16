@@ -19,7 +19,7 @@
 #include "SensorProxy.h"
 #include "SensorMessages.h"
 
-#define SP_DEBUG false
+#define SP_DEBUG true
 
 
 SensorProxy::SensorProxy(uint8_t pPin) : mPin(pPin) {
@@ -72,21 +72,56 @@ void SensorProxy::captureBufferValue() {
     sendMessage(SensorMessages::BUFFER_FULL);
     mBuffering = false;
   } else {
-    uint16_t pinValue = random(1023);
-    // uint16_t pinValue = analogRead(mPin);
+    int pinValue = analogRead(mPin);
     mBuffer[mBufferIndex] = pinValue;
-    sendMessage(SensorMessages::SENSOR_READING,mBuffer[mBufferIndex]);
+    int smoothValue = digitalSmooth(pinValue, mBufferSmoothing);
+    sendMessage(SensorMessages::SENSOR_READING,smoothValue);
+
     #if SP_DEBUG
       Serial.print("(SP) -> captureBufferValue(): wrote value to buffer: ");
-      Serial.println(mBuffer[mBufferIndex]);
+      Serial.print(mBuffer[mBufferIndex]);
+      Serial.print("filtered:: ");
+      Serial.println(smoothValue);
     #endif
     mBufferIndex++;
   }
 }
 
+int SensorProxy::digitalSmooth(int rawIn, int *sensSmoothArray){ 
+  int j, k, temp, top, bottom;
+  long total;
+  static int i;
+  static int sorted[FILTERSAMPLES];
+  boolean done;
 
+  i = (i + 1) % FILTERSAMPLES;
+  sensSmoothArray[i] = rawIn;
 
+  for (j=0; j<FILTERSAMPLES; j++){
+    sorted[j] = sensSmoothArray[j];
+  }
 
+  done = 0;        
+  while(done != 1){
+    done = 1;
+    for (j = 0; j < (FILTERSAMPLES - 1); j++){
+      if (sorted[j] > sorted[j + 1]){ 
+        temp = sorted[j + 1];
+        sorted [j+1] =  sorted[j] ;
+        sorted [j] = temp;
+        done = 0;
+      }
+    }
+  }
 
+  bottom = max(((FILTERSAMPLES * 15)  / 100), 1); 
+  top = min((((FILTERSAMPLES * 85) / 100) + 1  ), (FILTERSAMPLES - 1)); 
+  k = 0;
+  total = 0;
+  for ( j = bottom; j< top; j++){
+    total += sorted[j];
+    k++; 
+  }
 
-
+  return total / k;
+}
