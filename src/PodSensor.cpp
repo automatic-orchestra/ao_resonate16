@@ -87,9 +87,17 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
   // update state - first thing to do before anything else
   updateState();
 
-  // start motor movement after delay has elapsed
+  // handle delay
+  if(mPulseDelay > 0) {
+    mPulseDelay--;
+    if(mPulseDelay != 0) {
+      return;
+    }  
+  }
+
+  // start initial motor movement
   MotorProxy* motor = getConcreteParent()->getMotor();
-  if(mPulseCount >= mPulseDelay && !motor->isActive()) {
+  if(!motor->isActive()) {
     // start acceleration phase
     motor->accelerateToSpeed(3200, 50, 1.25);
     motor->start();
@@ -331,10 +339,10 @@ void PodSensor::goToNote(uint8_t pAddRotations)
   #endif
 
   // get next note and position index
-  mNoteToFollowIndex = getNextIndexToFollow();
+  uint16_t nextIndex = getNextIndexToFollow();
 
   // convert relative position to absolute motor postion
-  unsigned long relPosition = mPositionsBuffer[mNoteToFollowIndex] + MotorProxy::FULL_REVOLUTION * pAddRotations;
+  unsigned long relPosition = mPositionsBuffer[nextIndex] + MotorProxy::FULL_REVOLUTION * pAddRotations;
   unsigned long absPosition = getConcreteParent()->getMotor()->relativeToAbsolutePosition(relPosition);
 
   // move motor to new position
@@ -380,7 +388,12 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::TUNING_DONE:
-        onTuningDone();
+        if(mLastDrone) {
+          mPulseDelay = 20;
+        } else {
+          onTuningDone();
+        }
+        
         // if (!mMeisterStates.currentlyActive)
         // {
         //   if (currentTuning < 6)
@@ -417,6 +430,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 void PodSensor::onTuningDone() {
   if(isLastState()) {
     goToNote(3);
+    mLastDrone = true;
   } else {
     if(mMeisterStates.currentlyActive) {
       if(!mMeisterStates.isAtNote) {
