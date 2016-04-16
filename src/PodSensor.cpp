@@ -22,6 +22,11 @@
 #include "MotorMessages.h"
 #include "SensorMessages.h"
 
+#define MIN_SENSOR 650
+#define MAX_SENSOR 800
+#define MIN_NOTE 33
+#define MAX_NOTE 93
+
 #define SP_DEBUG true
 #define CHANNEL_DELAY_INCREMENT 15
 
@@ -46,17 +51,17 @@ PodSensor::PodSensor(Orchestra* pParent) : Pod(pParent) {
   applyPresets(presetArray);
 
   #if SP_DEBUG
-  Serial.printf("(PS) -> constructor(): midi channel is:  %i - meister flag: %i - pulse delay is: %i\n", midiChannel, mIsMeister, mPulseDelay);  
+  Serial.printf("(PS) -> constructor(): midi channel is:  %i - pulse delay is: %i\n", midiChannel, mPulseDelay);  
   #endif
 
   // initialize states
-  mStates[0] = new PodState("Introduction",    0, 0,    3200,   0,  450); // first state is not managed via AccelStepper acceleration
-  mStates[1] = new PodState("1st Development", 3, 500,  1000,  45, 1050);
-  mStates[2] = new PodState("2st Development", 4, 2000, 3000,  57, 1550);
-  mStates[3] = new PodState("3st Development", 2, 3500, 5000,  69, 1950);
-  mStates[4] = new PodState("4th Development", 5, 5000, 7000,  81, 2250);
-  mStates[5] = new PodState("5th Development", 1, 6000, 8500,  93, 2450);
-  mStates[6] = new PodState("Finale",          0, 0,    10000,  0, 2550);
+  mStates[0] = new PodState("Introduction",    0, 0,    3200,   0,        450); // first state is not managed via AccelStepper acceleration
+  mStates[1] = new PodState("1st Development", 3, 500,  1000,  MIN_NOTE, 1050);
+  mStates[2] = new PodState("2st Development", 4, 2000, 3000,  45,       1550);
+  mStates[3] = new PodState("3st Development", 2, 3500, 5000,  57,       1950);
+  mStates[4] = new PodState("4th Development", 5, 5000, 7000,  69,       2250);
+  mStates[5] = new PodState("5th Development", 1, 6000, 8500,  81,       2450);
+  mStates[6] = new PodState("Finale",          0, 0,    10000, MAX_NOTE, 2550);
 }
 
 
@@ -81,13 +86,6 @@ void PodSensor::onClockBeatChange(unsigned long beat) {
 
   // update state - first thing to do before anything else
   updateState();
-
-  // update meister flag
-  updateMeister();
-
-
-
-
 
   // start motor movement after delay has elapsed
   MotorProxy* motor = getConcreteParent()->getMotor();
@@ -280,7 +278,7 @@ void PodSensor::updateState() {
     mStateIndex = 0;
     // set inital state
     mCurrentState = *(mStates);
-    // set debug flag
+    // set flag
     newState = true;
   }
 
@@ -292,7 +290,7 @@ void PodSensor::updateState() {
     if(mStateIndex < STATE_COUNT) {
       // set new state
       mCurrentState = *(mStates + mStateIndex);
-      // set debug flag
+      // set flag
       newState = true;
     } else {
       mCurrentState = nullptr;
@@ -300,21 +298,29 @@ void PodSensor::updateState() {
   }
 
   if(newState) {
+    // update meister states
+    setMeisterStates();
+
     #if SP_DEBUG
     Serial.print("\n(PS) -> updateState(): current state is: ");
     Serial.println(mCurrentState->getName());
+    Serial.println("--------------------------------------------------------------------");
+    Serial.printf("meister currently active: %i\n", mMeisterStates.currentlyActive);
+    Serial.printf("meister was active: %i\n", mMeisterStates.wasActive);
+    Serial.printf("meister is at note: %i\n", mMeisterStates.isAtNote);
     Serial.println();
     #endif
   }
 }
 
 
-void PodSensor::updateMeister() {
-  if (getParent()->getChannel() == mCurrentState->getMeisterID()) {
-    mIsMeister = true;
-  } else {
-    mIsMeister = false;
-  }
+void PodSensor::setMeisterStates() {
+  // store previous activity
+  mMeisterStates.wasActive = mMeisterStates.currentlyActive; 
+  // set new activity
+  mMeisterStates.currentlyActive = getParent()->getChannel() == mCurrentState->getMeisterID(); 
+  // reset reached note
+  mMeisterStates.isAtNote = false;
 }
 
 
@@ -352,7 +358,7 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::TURNS_DONE:
-        if (mIsMeister)
+        if (mMeisterStates.currentlyActive)
         {
           #if SP_DEBUG
           Serial.println("(PS) -> onMotorMessage(): Decelerating Meister");
@@ -362,8 +368,8 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::DECELERATION_DONE:
-        if (mIsMeister) {
-          updateMeisterNoteIndex();
+        if (mMeisterStates.currentlyActive) {
+          // updateMeisterNoteIndex();
         } else {
           #if SP_DEBUG
           Serial.println("(PS) -> onMotorMessage(): Waiting for pulse ");
@@ -374,8 +380,8 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case MotorMessages::TUNING_DONE:
-
-        // if (!mIsMeister)
+        onTuningDone();
+        // if (!mMeisterStates.currentlyActive)
         // {
         //   if (currentTuning < 6)
         //   {
@@ -408,8 +414,30 @@ void PodSensor::onMotorMessage(uint8_t pMessage, uint16_t pValue) {
 }
 
 
-void PodSensor::updateMeisterNoteIndex()
-{
+void PodSensor::onTuningDone() {
+  if(isLastState()) {
+    goToNote(3);
+  } else {
+    if(mMeisterStates.currentlyActive) {
+      if(!mMeisterStates.isAtNote) {
+        goToNote();  
+        mMeisterStates.isAtNote = true;
+      }
+    } else {
+      //TODO add delay
+      goToNote();
+    }
+  }
+}
+
+
+bool PodSensor::isLastState() {
+  return mStateIndex == STATE_COUNT - 1;
+}
+
+
+// void PodSensor::updateMeisterNoteIndex()
+// {
   // //Faking to be the current Note for Tunning
   // bool safecheck = false;
   // for (int i = 0; i < BUFFER_SIZE; i++)
@@ -430,7 +458,7 @@ void PodSensor::updateMeisterNoteIndex()
   // #if SP_DEBUG
   // Serial.printf("(PS) -> updateMeisterNoteIndex(): meisterNoteIndex %i meisterNote %i",pMeisterNoteIndex,mNotesBuffer[pMeisterNoteIndex]);
   // #endif
-}
+// }
 
 
 uint16_t PodSensor::getNextIndexToFollow() {
@@ -485,7 +513,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
   switch(pMessage) {
     case SensorMessages::BUFFER_FULL:
         //Check if it is the Meister to assemble constant turns
-      if (mIsMeister)
+      if (mMeisterStates.currentlyActive)
       {
         //Is Meister, run more
         getConcreteParent()->getMotor()->turnAtSpeed(3200,1);
@@ -499,7 +527,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
       break;
 
       case SensorMessages::SENSOR_READING:
-        mNotesBuffer[bufferCounter] = map(pValue,0,1023,24,71);//map(pValue,0,1023,36,95);
+        mNotesBuffer[bufferCounter] = map(pValue, MIN_SENSOR, MAX_SENSOR, MIN_NOTE, MAX_NOTE);
         mPositionsBuffer[bufferCounter] = getConcreteParent()->getMotor()->mMotor.currentPosition();
         #if 0
           Serial.print("(PS) -> onSensorMessage(): index: ");
@@ -518,8 +546,7 @@ void PodSensor::onSensorMessage(uint8_t pMessage, uint16_t pValue) {
 void PodSensor::playNote(uint16_t pNote) {
   if(pNote != mLastNote) {
     // finally play the new note
-    // Serial.printf("(PS) -> onClockBeatChange(): Note %i\n",note);
-    //TODO add correct velocity
+    Serial.printf("(PS) -> playNote(): Note %i\n", pNote);
     Music.noteOn(pNote, 127);
     mLastNote = pNote;
   }

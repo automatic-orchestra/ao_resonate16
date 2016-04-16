@@ -24,6 +24,12 @@
 #include "SensorOrchestra.h"
 #include "PodState.h"
 
+struct Meister {
+  bool currentlyActive;
+  bool wasActive;
+  bool isAtNote;
+};
+
 
 class PodSensor : public Pod
 {
@@ -35,7 +41,7 @@ public:
   void onMotorMessage(uint8_t pMessage, uint16_t pValue);
   void onSensorMessage(uint8_t pMessage, uint16_t pValue);
 
-  void updateMeisterNoteIndex();
+  // void updateMeisterNoteIndex();
   void goToNote(uint8_t pAddRotations = 0);
   uint16_t getNextIndexToFollow();
   void playNote(uint16_t pNote);
@@ -49,12 +55,12 @@ public:
   // bool tuneFlags[5] = {false,false,false,false,false}; //turned ON when the first motion to that note has finished
   // unsigned int pulseTimings[7] = {450,1050,1550,1950,2250,2450,2550}; //lookup table for main timming triggers. first is intro, rest is related to the notes, last to the ending.
   
-  uint16_t pMeisterNoteIndex;
+  // uint16_t pMeisterNoteIndex;
   uint16_t mNoteToFollowIndex;
   
   // unsigned long pRealPosition = 0;
 
-  bool mIsMeister = false; // meister flag
+  // bool mIsMeister = false; // meister flag
   bool mLastDrone = false; // flag for last fading out
 
 private:
@@ -81,11 +87,15 @@ private:
   PodState* mCurrentState = nullptr;
   uint8_t mStateIndex = 0;
   // state related functions
-  void updateMeister();
+  void setMeisterStates();
 
+  void onTuningDone();
+  bool isLastState();
 
   void fadeOutVolume();
   void fadeInVolume();
+
+  Meister mMeisterStates = {false, false, false};
 };
 
 
